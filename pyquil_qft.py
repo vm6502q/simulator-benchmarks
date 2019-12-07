@@ -1,4 +1,5 @@
 #Adapted from https://github.com/libtangle/qcgpu/blob/master/benchmark/benchmark.py by Adam Kelly
+#Some functions taken from https://github.com/rigetti/grove/blob/master/grove/qft/fourier.py
 
 import click
 import time
@@ -7,31 +8,48 @@ import csv
 import os.path
 import math
 
-from qiskit import QuantumCircuit
-from qiskit import execute, BasicAer
+from typing import List
+
+from pyquil import get_qc, Program
+from pyquil.gates import SWAP, H, CPHASE, MEASURE
 
 # Implementation of the Quantum Fourier Transform
-def qft(num_qubits, circ):
-    # Quantum Fourier Transform
-    for j in range(num_qubits):
-        for k in range(j):
-            circ.cu1(math.pi/float(2**(j-k)), j, k)
-        circ.h(j)
-    for j in range(num_qubits):
-        circ.measure(j, j)
+def _core_qft(qubits: List[int], coeff: int) -> Program:
+    """
+    Generates the core program to perform the quantum Fourier transform
+    
+    :param qubits: A list of qubit indexes.
+    :param coeff: A modifier for the angle used in rotations (-1 for inverse QFT, 1 for QFT)
+    :return: A Quil program to compute the core (inverse) QFT of the qubits.
+    """
+    
+    q = qubits[0]
+    qs = qubits[1:]
+    if 1 == len(qubits):
+        return [H(q)]
+    else:
+        n = 1 + len(qs)
+        cR = []
+        for idx, i in enumerate(range(n - 1, 0, -1)):
+            q_idx = qs[idx]
+            angle = math.pi / 2 ** (n - i)
+            cR.append(CPHASE(coeff * angle, q, q_idx))
+        return _core_qft(qs, coeff) + list(reversed(cR)) + [H(q)]
 
-    return circ
-
-sim_backend = BasicAer.get_backend('qasm_simulator')
+def qft(qubits: List[int]) -> Program:
+    """
+    Generate a program to compute the quantum Fourier transform on a set of qubits.
+    :param qubits: A list of qubit indexes.
+    :return: A Quil program to compute the Fourier transform of the qubits.
+    """
+    p = Program().inst(_core_qft(qubits, 1))
+    return p
 
 def bench(num_qubits):
-    circ = QuantumCircuit(num_qubits, num_qubits)
-    circ.barrier()
-    qft(num_qubits, circ)
-    circ.barrier()
+    circ = qft(range(num_qubits))
+    sim_backend = get_qc(str(num_qubits) + 'q-qvm')
     start = time.time()
-    execute([circ], sim_backend)
-    circ.barrier()
+    sim_backend.run_and_measure(circ, trials=1)
     return time.time() - start
 
 # Reporting

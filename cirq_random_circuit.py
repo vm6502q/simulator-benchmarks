@@ -71,7 +71,7 @@ def write_csv(writer, data):
 @click.option('--single', default=False, help='Only run the benchmark for a single amount of qubits, and print an analysis')
 def benchmark(samples, qubits, depth, out, single):
     if single:
-        low = qubits
+        low = qubits - 1
     else:
         low = 3
     high = qubits
