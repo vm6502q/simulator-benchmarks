@@ -7,31 +7,28 @@ import csv
 import os.path
 import math
 
-from qiskit import QuantumCircuit
-from qiskit import execute, BasicAer
+import cirq
 
 # Implementation of the Quantum Fourier Transform
-def qft(num_qubits, circ):
+def qft(num_qubits, reg):
     # Quantum Fourier Transform
+    circ = cirq.Circuit()
     for j in range(num_qubits):
         for k in range(j):
-            circ.cu1(math.pi/float(2**(j-k)), j, k)
-        circ.h(j)
+            circ.append(cirq.CZPowGate(exponent=math.pi/float(2**(j-k))).on(reg[j], reg[k]))
+        circ.append(cirq.H(reg[j]))
     for j in range(num_qubits):
-        circ.measure(j, j)
+        circ.append(cirq.measure(reg[j]))
 
     return circ
 
-sim_backend = BasicAer.get_backend('qasm_simulator')
+sim_backend = cirq.Simulator()
 
 def bench(num_qubits):
-    circ = QuantumCircuit(num_qubits, num_qubits)
-    circ.barrier()
-    qft(num_qubits, circ)
-    circ.barrier()
+    reg = cirq.LineQubit.range(num_qubits)
+    circ = qft(num_qubits, reg)
     start = time.time()
-    execute([circ], sim_backend)
-    circ.barrier()
+    sim_backend.run(program=circ, repetitions=1)
     return time.time() - start
 
 # Reporting

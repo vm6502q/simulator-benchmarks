@@ -7,36 +7,23 @@ import csv
 import os.path
 import math
 
-from qiskit import QuantumCircuit
-from qiskit import execute, BasicAer
+import cirq
 
-# Decomposition of ISWAP
-def iswap(circ, c, t):
-    circ.x(c);
-    circ.s(c);
-    circ.s(t);
-    circ.h(t);
-    circ.cx(c, t);
-    circ.h(c);
-    circ.h(t);
-    circ.cx(c, t);
-    circ.h(c);
+def sqrtx(t):
+    return cirq.XPowGate(exponent=1/2).on(t)
 
-def sqrtx(circ, t):
-    circ.rx(math.pi / 2, t)
+def sqrty(t):
+    return cirq.YPowGate(exponent=1/2).on(t)
 
-def sqrty(circ, t):
-    circ.ry(math.pi / 2, t)
-
-def sqrth(circ, t):
-    # To 18 digits of precision for the angle parameters:
-    circ.u3(1.04719755119659775, 0.955316618124509278, 2.18627603546528396, t)
+def sqrth(t):
+    return cirq.HPowGate(exponent=1/2).on(t)
 
 # Implementation of Sycamore circuit
-def sycamore_circuit(num_qubits, depth, circ):
+def sycamore_circuit(num_qubits, depth, reg):
     gateSequence = [ 0, 3, 1, 2, 1, 2, 0, 3 ]
     sequenceRowStart = [ 1, 1, 0, 0 ]
     single_bit_gates = sqrtx, sqrty, sqrth
+    circ = cirq.Circuit()
 
     rowLen = math.floor(math.sqrt(num_qubits))
     while (((num_qubits / rowLen) * rowLen) != num_qubits):
@@ -47,7 +34,7 @@ def sycamore_circuit(num_qubits, depth, circ):
         # Single bit gates
         for j in range(num_qubits):
             gate = random.choice(single_bit_gates)
-            gate(circ, j)
+            circ.append(gate(reg[j]))
 
         gate = gateSequence[0]
         gateSequence.pop(0)
@@ -74,24 +61,21 @@ def sycamore_circuit(num_qubits, depth, circ):
                 b2 = tempRow * rowLen + tempCol;
 
                 # Two bit gates
-                circ.cu1(math.pi / 6, b1, b2)
-                iswap(circ, b1, b2)
+                circ.append(cirq.CZPowGate(exponent=1/6).on(reg[b1], reg[b2]))
+                circ.append(cirq.ISWAP(reg[b1], reg[b2]))
 
     for j in range(num_qubits):
-        circ.measure(j, j)
+        circ.append(cirq.measure(reg[j]))
 
     return circ
 
-sim_backend = BasicAer.get_backend('qasm_simulator')
+sim_backend = cirq.Simulator()
 
 def bench(num_qubits, depth):
-    circ = QuantumCircuit(num_qubits, num_qubits)
-    circ.barrier()
-    sycamore_circuit(num_qubits, depth, circ)
-    circ.barrier()
+    reg = cirq.LineQubit.range(num_qubits)
+    circ = sycamore_circuit(num_qubits, depth, reg)
     start = time.time()
-    execute([circ], sim_backend)
-    circ.barrier()
+    sim_backend.run(program=circ, repetitions=1)
     return time.time() - start
 
 # Reporting

@@ -38,7 +38,7 @@ def rand_circuit(num_qubits, depth, circ):
 
 sim_backend = BasicAer.get_backend('qasm_simulator')
 
-def bench_qiskit(num_qubits, depth):
+def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)
     circ.barrier()
     rand_circuit(num_qubits, depth, circ)
@@ -79,7 +79,7 @@ def benchmark(samples, qubits, depth, out, single):
         low = 3
     high = qubits
 
-    functions = bench_qiskit,
+    functions = bench,
     writer = create_csv(out)
 
     for n in range(low, high):

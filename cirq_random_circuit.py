@@ -7,91 +7,42 @@ import csv
 import os.path
 import math
 
-from qiskit import QuantumCircuit
-from qiskit import execute, BasicAer
+import cirq
 
-# Decomposition of ISWAP
-def iswap(circ, c, t):
-    circ.x(c);
-    circ.s(c);
-    circ.s(t);
-    circ.h(t);
-    circ.cx(c, t);
-    circ.h(c);
-    circ.h(t);
-    circ.cx(c, t);
-    circ.h(c);
-
-def sqrtx(circ, t):
-    circ.rx(math.pi / 2, t)
-
-def sqrty(circ, t):
-    circ.ry(math.pi / 2, t)
-
-def sqrth(circ, t):
-    # To 18 digits of precision for the angle parameters:
-    circ.u3(1.04719755119659775, 0.955316618124509278, 2.18627603546528396, t)
-
-# Implementation of Sycamore circuit
-def sycamore_circuit(num_qubits, depth, circ):
-    gateSequence = [ 0, 3, 1, 2, 1, 2, 0, 3 ]
-    sequenceRowStart = [ 1, 1, 0, 0 ]
-    single_bit_gates = sqrtx, sqrty, sqrth
-
-    rowLen = math.floor(math.sqrt(num_qubits))
-    while (((num_qubits / rowLen) * rowLen) != num_qubits):
-        rowLen = rowLen - 1;
-    colLen = num_qubits / rowLen;
+# Implementation of random universal circuit
+def rand_circuit(num_qubits, depth, reg):
+    single_bit_gates = cirq.H, cirq.X, cirq.Y, cirq.Z, cirq.T
+    two_bit_gates = cirq.SWAP, cirq.CNOT, cirq.CZ
+    circ = cirq.Circuit()
 
     for i in range(depth):
         # Single bit gates
         for j in range(num_qubits):
             gate = random.choice(single_bit_gates)
-            gate(circ, j)
+            circ.append(gate(reg[j]))
 
-        gate = gateSequence[0]
-        gateSequence.pop(0)
-        gateSequence.append(gate)
-
-        startsEvenRow = (sequenceRowStart[gate] == 0)
-
-        for row in range(sequenceRowStart[gate], math.floor(num_qubits / rowLen), 2):
-            for col in range(0, math.floor(num_qubits / colLen)):
-                tempRow = row
-                tempCol = col
-
-                tempRow = tempRow + (1 if (gate & 2) else -1)
-
-                if startsEvenRow:
-                    tempCol = tempCol + (0 if (gate & 1) else -1)
-                else:
-                    tempCol = tempCol + (1 if (gate & 1) else 0)
-
-                if (tempRow < 0) or (tempCol < 0) or (tempRow >= rowLen) or (tempCol >= colLen):
-                    continue
-
-                b1 = row * rowLen + col;
-                b2 = tempRow * rowLen + tempCol;
-
-                # Two bit gates
-                circ.cu1(math.pi / 6, b1, b2)
-                iswap(circ, b1, b2)
+        # Two bit gates
+        bit_set = [range(num_qubits)]    
+        while len(bit_set) > 1:
+            b1 = random.choice(bit_set)
+            bit_set.remove(b1)
+            b2 = random.choice(bit_set)
+            bit_set.remove(b2)
+            gate = random.choice(two_bit_gates)
+            circ.append(gate(reg[b1], reg[b2]))
 
     for j in range(num_qubits):
-        circ.measure(j, j)
+        circ.append(cirq.measure(reg[j]))
 
     return circ
 
-sim_backend = BasicAer.get_backend('qasm_simulator')
+sim_backend = cirq.Simulator()
 
 def bench(num_qubits, depth):
-    circ = QuantumCircuit(num_qubits, num_qubits)
-    circ.barrier()
-    sycamore_circuit(num_qubits, depth, circ)
-    circ.barrier()
+    reg = cirq.LineQubit.range(num_qubits)
+    circ = rand_circuit(num_qubits, depth, reg)
     start = time.time()
-    execute([circ], sim_backend)
-    circ.barrier()
+    sim_backend.run(program=circ, repetitions=1)
     return time.time() - start
 
 # Reporting
