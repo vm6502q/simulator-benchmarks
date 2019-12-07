@@ -73,7 +73,7 @@ def benchmark(samples, qubits, out, single):
         for i in range(samples):
             func = random.choice(functions)
             t = func(n + 1)
-            write_csv(writer, {'name': func.__name__, 'num_qubits': n+1, 'time': t})
+            write_csv(writer, {'name': 'cirq_qft', 'num_qubits': n+1, 'time': t})
 
 if __name__ == '__main__':
     benchmark()
