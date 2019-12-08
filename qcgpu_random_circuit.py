@@ -9,13 +9,13 @@ import math
 
 import qcgpu
 
-def cx(q1, q2, circ):
+def cx(circ, q1, q2):
     circ.cx(q1, q2)
 
-def cz(q1, q2, circ):
+def cz(circ, q1, q2):
     circ.cz(q1, q2)
 
-def swap(q1, q2, circ):
+def swap(circ, q1, q2):
     circ.cx(q1, q2)
     circ.cx(q2, q1)
     circ.cx(q1, q2)
@@ -39,7 +39,7 @@ def rand_circuit(num_qubits, depth, circ):
             b2 = random.choice(bit_set)
             bit_set.remove(b2)
             gate = random.choice(two_bit_gates)
-            gate(b1, b2, circ)
+            gate(circ, b1, b2)
 
     circ.measure()
 

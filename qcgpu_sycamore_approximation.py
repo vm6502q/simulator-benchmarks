@@ -7,13 +7,12 @@ import csv
 import os.path
 import math
 
-from qiskit import QuantumCircuit
-from qiskit import execute, BasicAer
+import qcgpu
 
 # Decomposition of ISWAP
-# With this decomposition, Qiskit can readily simulate the Sycamore chip benchmark.
-# However, for "apples-to-apples" comparison to the other simulators, with reasonable
-# allowance for easily-implemented extensions to the simulator API, we use SWAP instead.
+# We assume that the addition of iswap to the API is a basically trivial task.
+# This keeps parity with similarly motivated allowances for Qiskit and QVM.
+# swap is used instead.
 #def iswap(circ, c, t):
 #    circ.x(c);
 #    circ.s(c);
@@ -31,14 +30,14 @@ def swap(circ, q1, q2):
     circ.cx(q1, q2)
 
 def sqrtx(circ, t):
-    circ.rx(math.pi / 2, t)
+    circ.u(t, -3 * math.pi / 2, -math.pi / 2, math.pi / 2)
 
 def sqrty(circ, t):
-    circ.ry(math.pi / 2, t)
+    circ.u(t, -3 * math.pi / 2, 0, 0)
 
 def sqrth(circ, t):
     # To 18 digits of precision for the angle parameters:
-    circ.u3(1.04719755119659775, 0.955316618124509278, 2.18627603546528396, t)
+    circ.u3(t, 1.04719755119659775, 0.955316618124509278, 2.18627603546528396)
 
 # Implementation of Sycamore circuit
 def sycamore_circuit(num_qubits, depth, circ):
@@ -82,25 +81,19 @@ def sycamore_circuit(num_qubits, depth, circ):
                 b2 = tempRow * rowLen + tempCol;
 
                 # Two bit gates
-                circ.cu1(math.pi / 6, b1, b2)
+                circ.cu1(b1, b2, math.pi / 6)
                 #iswap(circ, b1, b2)
                 swap(circ, b1, b2)
 
-    for j in range(num_qubits):
-        circ.measure(j, j)
+    circ.measure()
 
     return circ
 
-sim_backend = BasicAer.get_backend('qasm_simulator')
-
 def bench(num_qubits, depth):
-    circ = QuantumCircuit(num_qubits, num_qubits)
-    circ.barrier()
-    sycamore_circuit(num_qubits, depth, circ)
-    circ.barrier()
     start = time.time()
-    execute([circ], sim_backend)
-    circ.barrier()
+    state = qcgpu.State(num_qubits)
+    sycamore_circuit(num_qubits, depth, state)
+    state.backend.queue.finish()
     return time.time() - start
 
 # Reporting
