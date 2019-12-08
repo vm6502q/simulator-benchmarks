@@ -15,7 +15,7 @@ def cx(q1, q2, circ):
 def cz(q1, q2, circ):
     circ.cz(q1, q2)
 
-def swap(q1, q2):
+def swap(q1, q2, circ):
     circ.cx(q1, q2)
     circ.cx(q2, q1)
     circ.cx(q1, q2)
