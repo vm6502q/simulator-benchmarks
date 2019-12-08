@@ -11,47 +11,21 @@ import math
 from typing import List
 
 from pyquil import get_qc, Program
-from pyquil.gates import SWAP, H, X, Y, Z, T, CNOT, CZ, MEASURE
+from pyquil.gates import ISWAP, RX, RY, H, CPHASE, MEASURE
 
-# Implementation of the Quantum Fourier Transform
-def _core_random_circuit(reg: List[int], depth: int) -> Program:
-    """
-    Generates the core program to perform the random universal circuit benchmark
-    
-    :param qubits: A list of qubit indexes.
-    :param depth: Benchmark circuit depth
-    :return: A Quil program to perform the random universal circuit benchmark
-    """
-    single_bit_gates = H, X, Y, Z, T
-    two_bit_gates = SWAP, CNOT, CZ
-    circ = []
-
-    for i in range(depth):
-        # Single bit gates
-        for j in range(len(reg)):
-            gate = random.choice(single_bit_gates)
-            circ.append(gate(reg[j]))
-
-        # Two bit gates
-        bit_set = [reg]  
-        while len(bit_set) > 1:
-            b1 = random.choice(bit_set)
-            bit_set.remove(b1)
-            b2 = random.choice(bit_set)
-            bit_set.remove(b2)
-            gate = random.choice(two_bit_gates)
-            circ.append(gate(reg[b1], reg[b2]))
-
-    return circ
-
-def sqrtx(circ, t):
+def sqrtx(t):
     return RX(math.pi / 2, t)
 
-def sqrty(circ, t):
+def sqrty(t):
     return RY(math.pi / 2, t)
 
+# pyquil/QVM has a universal gate set. It therefore possible decompose "sqrth" into other gates in the API.
+# However, this is not necessarily practical or representative. For an "apples-to-apples" comparison with
+# the other simulators, making reasonable allowance for easily-implemetned extensions to the simulator API,
+# replacing "sqrth" with "H" is probably a fairer test.
+
 # Implementation of Sycamore circuit
-def sycamore_circuit(qubits: List[int], depth: int) -> Program:
+def _core_sycamore_circuit(reg: List[int], depth: int) -> Program:
     """
     Generates the core program to perform an approximation of the Sycamore chip benchmark
     
@@ -60,9 +34,10 @@ def sycamore_circuit(qubits: List[int], depth: int) -> Program:
     :return: A Quil program to perform an approximation of the Sycamore chip benchmark
     """
 
+    num_qubits = len(reg)
     gateSequence = [ 0, 3, 1, 2, 1, 2, 0, 3 ]
     sequenceRowStart = [ 1, 1, 0, 0 ]
-    single_bit_gates = sqrtx, sqrty, H # H should actually be sqrth, is the only difference
+    single_bit_gates = sqrtx, sqrty, H # H should actually be sqrth
     circ = []
 
     rowLen = math.floor(math.sqrt(num_qubits))
@@ -72,7 +47,7 @@ def sycamore_circuit(qubits: List[int], depth: int) -> Program:
 
     for i in range(depth):
         # Single bit gates
-        for j in range(num_qubits):
+        for j in range(len(reg)):
             gate = random.choice(single_bit_gates)
             circ.append(gate(reg[j]))
 
@@ -101,11 +76,8 @@ def sycamore_circuit(qubits: List[int], depth: int) -> Program:
                 b2 = tempRow * rowLen + tempCol;
 
                 # Two bit gates
-                circ.append(CPHASE(math.pow(-1, 1/6), reg[b1], reg[b2]))
+                circ.append(CPHASE(math.pi / 6, reg[b1], reg[b2]))
                 circ.append(ISWAP(reg[b1], reg[b2]))
-
-    for j in range(num_qubits):
-        circ.append(cirq.measure(reg[j]))
 
     return circ
 
@@ -116,7 +88,7 @@ def sycamore_circuit(qubits: List[int], depth: int) -> Program:
     :param depth: Benchmark circuit depth
     :return: A Quil program to perform an approximation of the Sycamore chip benchmark
     """
-    p = Program().inst(_core_random_circuit(qubits, depth))
+    p = Program().inst(_core_sycamore_circuit(qubits, depth))
     return p
 
 def bench(num_qubits, depth):
