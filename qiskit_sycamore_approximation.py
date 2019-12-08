@@ -13,7 +13,7 @@ from qiskit import execute, BasicAer
 # Decomposition of ISWAP
 # With this decomposition, Qiskit can readily simulate the Sycamore chip benchmark.
 # However, for "apples-to-apples" comparison to the other simulators, with reasonable
-# allowance easily-implemented extensions to the simulator API, we use SWAP instead.
+# allowance for easily-implemented extensions to the simulator API, we use SWAP instead.
 #def iswap(circ, c, t):
 #    circ.x(c);
 #    circ.s(c);
