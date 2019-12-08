@@ -21,7 +21,7 @@ def sqrty(t):
 
 # pyquil/QVM has a universal gate set. It is therefore possible decompose "sqrth" into other gates in the API.
 # However, this is not necessarily practical or representative. For an "apples-to-apples" comparison with
-# the other simulators, making reasonable allowance for easily-implemetned extensions to the simulator API,
+# the other simulators, making reasonable allowance for easily-implemented extensions to the simulator API,
 # replacing "sqrth" with "H" is probably a fairer test.
 
 # Implementation of Sycamore circuit
