@@ -18,6 +18,7 @@ def bench(num_qubits):
         for k in range(j):
             state.cu1(j, k, math.pi/float(2**(j-k)))
         state.h(j)
+    state.measure()
 
     state.backend.queue.finish()
     return time.time() - start
