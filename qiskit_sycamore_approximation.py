@@ -11,16 +11,19 @@ from qiskit import QuantumCircuit
 from qiskit import execute, BasicAer
 
 # Decomposition of ISWAP
-def iswap(circ, c, t):
-    circ.x(c);
-    circ.s(c);
-    circ.s(t);
-    circ.h(t);
-    circ.cx(c, t);
-    circ.h(c);
-    circ.h(t);
-    circ.cx(c, t);
-    circ.h(c);
+# With this decomposition, Qiskit can readily simulate the Sycamore chip benchmark.
+# However, for "apples-to-apples" comparison to the other simulators, with reasonable
+# allowance easily-implemented extensions to the simulator API, we use SWAP instead.
+#def iswap(circ, c, t):
+#    circ.x(c);
+#    circ.s(c);
+#    circ.s(t);
+#    circ.h(t);
+#    circ.cx(c, t);
+#    circ.h(c);
+#    circ.h(t);
+#    circ.cx(c, t);
+#    circ.h(c);
 
 def sqrtx(circ, t):
     circ.rx(math.pi / 2, t)
@@ -75,7 +78,8 @@ def sycamore_circuit(num_qubits, depth, circ):
 
                 # Two bit gates
                 circ.cu1(math.pi / 6, b1, b2)
-                iswap(circ, b1, b2)
+                #iswap(circ, b1, b2)
+                circ.swap(b1, b2)
 
     for j in range(num_qubits):
         circ.measure(j, j)
