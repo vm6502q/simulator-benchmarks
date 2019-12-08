@@ -16,11 +16,11 @@ from pyquil.gates import SWAP, H, X, Y, Z, T, CNOT, CZ, MEASURE
 # Implementation of the Quantum Fourier Transform
 def _core_random_circuit(reg: List[int], depth: int) -> Program:
     """
-    Generates the core program to perform the quantum Fourier transform
+    Generates the core program to perform the random universal circuit benchmark
     
     :param qubits: A list of qubit indexes.
-    :param coeff: A modifier for the angle used in rotations (-1 for inverse QFT, 1 for QFT)
-    :return: A Quil program to compute the core (inverse) QFT of the qubits.
+    :param depth: Benchmark circuit depth
+    :return: A Quil program to perform the random universal circuit benchmark
     """
     single_bit_gates = H, X, Y, Z, T
     two_bit_gates = SWAP, CNOT, CZ
@@ -46,9 +46,10 @@ def _core_random_circuit(reg: List[int], depth: int) -> Program:
 
 def random_circuit(qubits: List[int], depth: int) -> Program:
     """
-    Generate a program to compute the quantum Fourier transform on a set of qubits.
+    Generate a program to perform the random universal circuit benchmark on a set of qubits.
     :param qubits: A list of qubit indexes.
-    :return: A Quil program to compute the Fourier transform of the qubits.
+    :param depth: Benchmark circuit depth
+    :return: A Quil program to perform the random universal circuit benchmark
     """
     p = Program().inst(_core_random_circuit(qubits, depth))
     return p
