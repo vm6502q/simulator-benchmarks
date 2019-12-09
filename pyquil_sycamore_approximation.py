@@ -11,7 +11,7 @@ import math
 from typing import List
 
 from pyquil import get_qc, Program
-from pyquil.gates import ISWAP, RX, RY, H, CPHASE, MEASURE
+from pyquil.gates import ISWAP, RX, RY, H, CPHASE
 
 def sqrtx(t):
     return RX(math.pi / 2, t)

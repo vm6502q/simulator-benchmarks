@@ -11,7 +11,7 @@ import math
 from typing import List
 
 from pyquil import get_qc, Program
-from pyquil.gates import SWAP, H, CPHASE, MEASURE
+from pyquil.gates import SWAP, H, CPHASE
 
 # Implementation of the Quantum Fourier Transform
 def _core_qft(qubits: List[int], coeff: int) -> Program:

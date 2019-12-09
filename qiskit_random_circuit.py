@@ -13,7 +13,7 @@ from qiskit import execute, BasicAer
 # Implementation of random universal circuit
 def rand_circuit(num_qubits, depth, circ):
     single_bit_gates = circ.h, circ.x, circ.y, circ.z, circ.t
-    two_bit_gates = circ.swap, circ.cnot, circ.cz
+    multi_bit_gates = circ.swap, circ.cnot, circ.cz, circ.ccx
 
     for i in range(depth):
         # Single bit gates
@@ -21,15 +21,22 @@ def rand_circuit(num_qubits, depth, circ):
             gate = random.choice(single_bit_gates)
             gate(j)
 
-        # Two bit gates
+        # Multi bit gates
         bit_set = [range(num_qubits)]    
         while len(bit_set) > 1:
             b1 = random.choice(bit_set)
             bit_set.remove(b1)
             b2 = random.choice(bit_set)
             bit_set.remove(b2)
-            gate = random.choice(two_bit_gates)
-            gate(b1, b2)
+            gate = random.choice(multi_bit_gates)
+            while len(bit_set) == 0 and gate == circ.ccx:
+                gate = random.choice(multi_bit_gates)
+            if gate == circ.ccx:
+                b3 = random.choice(bit_set)
+                bit_set.remove(b3)
+                gate(b1, b2, b3)
+            else:
+                gate(b1, b2)
 
     for j in range(num_qubits):
         circ.measure(j, j)

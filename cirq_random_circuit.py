@@ -12,7 +12,7 @@ import cirq
 # Implementation of random universal circuit
 def rand_circuit(num_qubits, depth, reg):
     single_bit_gates = cirq.H, cirq.X, cirq.Y, cirq.Z, cirq.T
-    two_bit_gates = cirq.SWAP, cirq.CNOT, cirq.CZ
+    multi_bit_gates = cirq.SWAP, cirq.CNOT, cirq.CZ, cirq.CCNOT
     circ = cirq.Circuit()
 
     for i in range(depth):
@@ -21,15 +21,22 @@ def rand_circuit(num_qubits, depth, reg):
             gate = random.choice(single_bit_gates)
             circ.append(gate(reg[j]))
 
-        # Two bit gates
-        bit_set = [range(num_qubits)]    
+        # Multi bit gates
+        bit_set = [range(num_qubits)]
         while len(bit_set) > 1:
             b1 = random.choice(bit_set)
             bit_set.remove(b1)
             b2 = random.choice(bit_set)
             bit_set.remove(b2)
-            gate = random.choice(two_bit_gates)
-            circ.append(gate(reg[b1], reg[b2]))
+            gate = random.choice(multi_bit_gates)
+            while len(bit_set) == 0 and gate == cirq.CCNOT:
+                gate = random.choice(multi_bit_gates)
+            if gate == cirq.CCNOT:
+                b3 = random.choice(bit_set)
+                bit_set.remove(b3)
+                circ.append(gate(reg[b1], reg[b2], reg[b3]))
+            else:
+                circ.append(gate(reg[b1], reg[b2]))
 
     for j in range(num_qubits):
         circ.append(cirq.measure(reg[j]))

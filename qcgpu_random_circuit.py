@@ -20,10 +20,13 @@ def swap(circ, q1, q2):
     circ.cx(q2, q1)
     circ.cx(q1, q2)
 
+def toffoli(circ, q1, q2, q3):
+    circ.toffoli(q1, q2, q3)
+
 # Implementation of random universal circuit
 def rand_circuit(num_qubits, depth, circ):
     single_bit_gates = circ.h, circ.x, circ.y, circ.z, circ.t
-    two_bit_gates = swap, cx, cz
+    multi_bit_gates = swap, cx, cz, toffoli
 
     for i in range(depth):
         # Single bit gates
@@ -31,15 +34,22 @@ def rand_circuit(num_qubits, depth, circ):
             gate = random.choice(single_bit_gates)
             gate(j)
 
-        # Two bit gates
+        # Multi bit gates
         bit_set = [range(num_qubits)]    
         while len(bit_set) > 1:
             b1 = random.choice(bit_set)
             bit_set.remove(b1)
             b2 = random.choice(bit_set)
             bit_set.remove(b2)
-            gate = random.choice(two_bit_gates)
-            gate(circ, b1, b2)
+            gate = random.choice(multi_bit_gates)
+            while len(bit_set) == 0 and gate == toffoli:
+                gate = random.choice(multi_bit_gates)
+            if gate == toffoli:
+                b3 = random.choice(bit_set)
+                bit_set.remove(b3)
+                gate(circ, b1, b2, b3)
+            else:
+                gate(circ, b1, b2)
 
     circ.measure()
 

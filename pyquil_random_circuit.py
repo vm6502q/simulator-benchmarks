@@ -11,7 +11,7 @@ import math
 from typing import List
 
 from pyquil import get_qc, Program
-from pyquil.gates import SWAP, H, X, Y, Z, T, CNOT, CZ, MEASURE
+from pyquil.gates import SWAP, H, X, Y, Z, T, CNOT, CCNOT, CZ
 
 # Implementation of the Quantum Fourier Transform
 def _core_random_circuit(reg: List[int], depth: int) -> Program:
@@ -23,7 +23,7 @@ def _core_random_circuit(reg: List[int], depth: int) -> Program:
     :return: A Quil program to perform the random universal circuit benchmark
     """
     single_bit_gates = H, X, Y, Z, T
-    two_bit_gates = SWAP, CNOT, CZ
+    multi_bit_gates = SWAP, CNOT, CZ, CCNOT
     circ = []
 
     for i in range(depth):
@@ -32,15 +32,22 @@ def _core_random_circuit(reg: List[int], depth: int) -> Program:
             gate = random.choice(single_bit_gates)
             circ.append(gate(reg[j]))
 
-        # Two bit gates
-        bit_set = [reg]  
+        # Multi bit gates
+        bit_set = [reg]
         while len(bit_set) > 1:
             b1 = random.choice(bit_set)
             bit_set.remove(b1)
             b2 = random.choice(bit_set)
             bit_set.remove(b2)
-            gate = random.choice(two_bit_gates)
-            circ.append(gate(reg[b1], reg[b2]))
+            gate = random.choice(multi_bit_gates)
+            while len(bit_set) == 0 and gate == CCNOT:
+                gate = random.choice(multi_bit_gates)
+            if gate == CCNOT:
+                b3 = random.choice(bit_set)
+                bit_set.remove(b3)
+                circ.append(gate(reg[b1], reg[b2], reg[b3]))
+            else:
+                circ.append(gate(reg[b1], reg[b2]))
 
     return circ
 
