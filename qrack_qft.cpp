@@ -16,10 +16,10 @@ int main()
     }, true, false, testEngineType == QINTERFACE_QUNIT);
 #endif
 
-    // Random permutation with random H gates, for initialization
+    // Totally random, totally separable qubits, for initialization
     benchmarkLoop(
         [](Qrack::QInterfacePtr qftReg, int n, int unused) {
             qftReg->QFT(0, n, false);
             qftReg->MReg(0, n);
-        }, 1, 1, true, true, true);
+        }, 1, 1, false, false, false, true);
 }
