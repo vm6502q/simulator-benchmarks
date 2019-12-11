@@ -25,6 +25,9 @@ double formatTime(double t, bool logNormal)
 void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> fn, bitLenInt mxQbts, int minDepth = 1, int maxDepth = 1, bool resetRandomPerm = true,
     bool hadamardRandomBits = false, bool logNormal = false)
 {
+    // Get OpenCL header out of the way:
+    Qrack::QInterfacePtr qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, 1, 0);
+
     std::cout << std::endl;
     std::cout << ITERATIONS << " iterations" << std::endl;
     std::cout << "# of Qubits, ";
@@ -45,9 +48,9 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
     double avgt, stdet;
 
     for (numBits = 4; numBits <= mxQbts; numBits++) {
-        for (depth = minDepth; depth < maxDepth; depth++) {
+        for (depth = minDepth; depth <= maxDepth; depth++) {
 
-            Qrack::QInterfacePtr qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, numBits, 0);
+            qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, numBits, 0);
 
             avgt = 0.0;
 
