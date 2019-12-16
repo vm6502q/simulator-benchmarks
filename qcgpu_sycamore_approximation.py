@@ -140,7 +140,7 @@ def benchmark(samples, qubits, depth, out, single):
             for i in range(samples):
                 func = random.choice(functions)
                 t = func(n+1, d+1)
-                write_csv(writer, {'name': 'qiskit_sycamore', 'num_qubits': n+1, 'depth': d+1, 'time': t})
+                write_csv(writer, {'name': 'qcgpu_sycamore', 'num_qubits': n+1, 'depth': d+1, 'time': t})
 
 if __name__ == '__main__':
     benchmark()

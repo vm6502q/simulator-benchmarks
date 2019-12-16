@@ -3,6 +3,8 @@
 // (C) Daniel Strano and the Qrack contributors 2017-2019. All rights reserved.
 //
 
+#include <list>
+
 #include "qrack_benchmarks.hpp"
 
 using namespace Qrack;
