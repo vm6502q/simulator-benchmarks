@@ -26,12 +26,10 @@ sim_backend = BasicAer.get_backend('qasm_simulator')
 
 def bench(num_qubits):
     circ = QuantumCircuit(num_qubits, num_qubits)
-    circ.barrier()
     qft(num_qubits, circ)
-    circ.barrier()
     start = time.time()
-    execute([circ], sim_backend)
-    circ.barrier()
+    job = execute([circ], sim_backend)
+    result = job.result()
     return time.time() - start
 
 # Reporting

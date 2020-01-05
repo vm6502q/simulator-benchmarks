@@ -8,7 +8,8 @@ import os.path
 import math
 
 from qiskit import QuantumCircuit
-from qiskit import execute, BasicAer
+from qiskit import execute
+from qiskit.providers.qrack import Qrack
 
 # Implementation of random universal circuit
 def rand_circuit(num_qubits, depth, circ):
@@ -22,7 +23,7 @@ def rand_circuit(num_qubits, depth, circ):
             gate(j)
 
         # Multi bit gates
-        bit_set = [range(num_qubits)]    
+        bit_set = [range(num_qubits)]
         while len(bit_set) > 1:
             b1 = random.choice(bit_set)
             bit_set.remove(b1)
@@ -43,7 +44,7 @@ def rand_circuit(num_qubits, depth, circ):
 
     return circ
 
-sim_backend = BasicAer.get_backend('qasm_simulator')
+sim_backend = Qrack.get_backend('qasm_simulator')
 
 def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)
@@ -57,7 +58,7 @@ def bench(num_qubits, depth):
 def create_csv(filename):
     file_exists = os.path.isfile(filename)
     csvfile = open(filename, 'a')
-   
+
     headers = ['name', 'num_qubits', 'depth', 'time']
     writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',fieldnames=headers)
 
