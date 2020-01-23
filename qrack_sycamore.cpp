@@ -18,7 +18,7 @@ int main()
         // The test runs 2 bit gates according to a tiling sequence.
         // The 1 bit indicates +/- column offset.
         // The 2 bit indicates +/- row offset.
-        std::list<bitLenInt> gateSequence = { 0, 3, 1, 2, 1, 2, 0, 3 };
+        std::list<bitLenInt> gateSequence = { 0, 3, 2, 1, 2, 1, 0, 3 };
 
         // Depending on which element of the sequential tiling we're running, per depth iteration,
         // we need to start either with row "0" or row "1".
@@ -56,22 +56,55 @@ int main()
             for (i = 0; i < n; i++) {
                 gateRand = qReg->Rand();
 
-                // Each individual bit has one of these 3 gates applied at random.
+                / Each individual bit has one of these 3 gates applied at random.
                 // Qrack has optimizations for gates including X, Y, and particularly H, but these "Sqrt" variants
                 // are handled as general single bit gates.
-                if (gateRand < (ONE_R1 / 3)) {
-                    qReg->SqrtX(i);
-                } else if (gateRand < (2 * ONE_R1 / 3)) {
-                    qReg->SqrtY(i);
-                } else {
-                    // "Square root of W" is understood to be the square root of the Walsh-Hadamard transform,
-                    // (a.k.a "H" gate).
-                    qReg->SqrtH(i);
-                }
 
-                // This is a QUnit specific optimization attempt method that can "compress" (or "Schmidt decompose")
-                // the representation without changing the logical state of the QUnit, up to float error:
-                // qReg->TrySeparate(i);
+                // The same gate is not applied twice consecutively in sequence.
+
+                if (d == 0) {
+                    // For the first iteration, we can pick any gate.
+
+                    if (gateRand < (ONE_R1 / 3)) {
+                        qReg->SqrtX(i);
+                        lastSingleBitGates.push_back(0);
+                    } else if (gateRand < (2 * ONE_R1 / 3)) {
+                        qReg->SqrtY(i);
+                        lastSingleBitGates.push_back(1);
+                    } else {
+                        // "Square root of W" appears to be equivalent to T.SqrtX.IT, looking at the definition in the
+                        // supplemental materials.
+                        qReg->SqrtXConjT(i);
+                        lastSingleBitGates.push_back(2);
+                    }
+                } else {
+                    // For all subsequent iterations after the first, we eliminate the choice of the same gate applied
+                    // on the immediately previous iteration.
+
+                    std::set<int> gateChoices = { 0, 1, 2 };
+                    gateChoiceIterator = gateChoices.begin();
+                    std::advance(gateChoiceIterator, lastSingleBitGates[i]);
+                    gateChoices.erase(gateChoiceIterator);
+
+                    gateChoiceIterator = gateChoices.begin();
+                    std::advance(gateChoiceIterator, (gateRand < (ONE_R1 / 2)) ? 0 : 1);
+                    gateChoices.erase(gateChoiceIterator);
+
+                    gateChoice = *(gateChoices.begin());
+
+                    if (gateChoice == 0) {
+                        qReg->SqrtX(i);
+                        lastSingleBitGates[i] = 0;
+                    } else if (gateChoice == 1) {
+                        qReg->SqrtY(i);
+                        lastSingleBitGates[i] = 1;
+                    } else {
+                        // "Square root of W" appears to be equivalent to T.SqrtX.IT, looking at the definition in the
+                        // supplemental materials.
+                        qReg->SqrtXConjT(i);
+                        lastSingleBitGates[i] = 2;
+                    }
+                }
             }
 
             gate = gateSequence.front();

@@ -15,14 +15,14 @@ def sqrtx(t):
 def sqrty(t):
     return cirq.YPowGate(exponent=1/2).on(t)
 
-def sqrth(t):
-    return cirq.HPowGate(exponent=1/2).on(t)
+def sqrtw(t):
+    return cirq.PhasedXPowGate(phase_exponent=0.25, exponent=0.5).on(t)
 
 # Implementation of Sycamore circuit
 def sycamore_circuit(num_qubits, depth, reg):
-    gateSequence = [ 0, 3, 1, 2, 1, 2, 0, 3 ]
+    gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
     sequenceRowStart = [ 1, 1, 0, 0 ]
-    single_bit_gates = sqrtx, sqrty, sqrth
+    single_bit_gates = sqrtx, sqrty, sqrtw
     circ = cirq.Circuit()
 
     rowLen = math.floor(math.sqrt(num_qubits))
@@ -30,11 +30,20 @@ def sycamore_circuit(num_qubits, depth, reg):
         rowLen = rowLen - 1;
     colLen = num_qubits / rowLen;
 
+    lastSingleBitGates = []
+
     for i in range(depth):
         # Single bit gates
+        singleBitGates = []
         for j in range(num_qubits):
             gate = random.choice(single_bit_gates)
+            if len(lastSingleBitGates) > 0:
+                while gate == lastSingleBitGates[j]:
+                    gate = random.choice(single_bit_gates)
             circ.append(gate(reg[j]))
+            singleBitGates.append(gate)
+
+        lastSingleBitGates = singleBitGates
 
         gate = gateSequence[0]
         gateSequence.pop(0)
