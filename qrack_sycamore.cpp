@@ -49,9 +49,6 @@ int main()
 
         bitLenInt controls[1];
 
-        std::set<int> gateChoices = { 0, 1, 2 };
-        std::set<int>::iterator gateChoiceIterator;
-
         // We repeat the entire prepartion for "depth" iterations.
         // We can avoid maximal representational entanglement of the state as a single Schr{\"o}dinger method unit.
         // See https://arxiv.org/abs/1710.05867
@@ -85,7 +82,8 @@ int main()
                     // For all subsequent iterations after the first, we eliminate the choice of the same gate applied
                     // on the immediately previous iteration.
 
-                    gateChoiceIterator = gateChoices.begin();
+                    std::set<int> gateChoices = { 0, 1, 2 };
+                    std::set<int>::iterator gateChoiceIterator = gateChoices.begin();
                     std::advance(gateChoiceIterator, lastSingleBitGates[i]);
                     gateChoices.erase(gateChoiceIterator);
 
