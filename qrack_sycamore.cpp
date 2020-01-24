@@ -18,6 +18,8 @@ int main()
         // The test runs 2 bit gates according to a tiling sequence.
         // The 1 bit indicates +/- column offset.
         // The 2 bit indicates +/- row offset.
+        // This is the "ABCDCDAB" pattern, from the Cirq definition of the circuit in the supplemental materials to the
+        // paper.
         std::list<bitLenInt> gateSequence = { 0, 3, 2, 1, 2, 1, 0, 3 };
 
         // Depending on which element of the sequential tiling we're running, per depth iteration,
@@ -49,11 +51,14 @@ int main()
 
         bitLenInt controls[1];
 
+        std::vector<int> lastSingleBitGates;
+        std::set<int>::iterator gateChoiceIterator;
+        int gateChoice;
+
         // We repeat the entire prepartion for "depth" iterations.
         // We can avoid maximal representational entanglement of the state as a single Schr{\"o}dinger method unit.
         // See https://arxiv.org/abs/1710.05867
         for (d = 0; d < depth; d++) {
-            std::vector<bitLenInt> lastSingleBitGates;
             for (i = 0; i < n; i++) {
                 gateRand = qReg->Rand();
 
@@ -83,7 +88,7 @@ int main()
                     // on the immediately previous iteration.
 
                     std::set<int> gateChoices = { 0, 1, 2 };
-                    std::set<int>::iterator gateChoiceIterator = gateChoices.begin();
+                    gateChoiceIterator = gateChoices.begin();
                     std::advance(gateChoiceIterator, lastSingleBitGates[i]);
                     gateChoices.erase(gateChoiceIterator);
 
@@ -91,12 +96,12 @@ int main()
                     std::advance(gateChoiceIterator, (gateRand < (ONE_R1 / 2)) ? 0 : 1);
                     gateChoices.erase(gateChoiceIterator);
 
-                    gate = *(gateChoices.begin());
+                    gateChoice = *(gateChoices.begin());
 
-                    if (gate == 0) {
+                    if (gateChoice == 0) {
                         qReg->SqrtX(i);
                         lastSingleBitGates[i] = 0;
-                    } else if (gate == 1) {
+                    } else if (gateChoice == 1) {
                         qReg->SqrtY(i);
                         lastSingleBitGates[i] = 1;
                     } else {
@@ -106,6 +111,10 @@ int main()
                         lastSingleBitGates[i] = 2;
                     }
                 }
+
+                // This is a QUnit specific optimization attempt method that can "compress" (or "Schmidt decompose")
+                // the representation without changing the logical state of the QUnit, up to float error:
+                // qReg->TrySeparate(i);
             }
 
             gate = gateSequence.front();
