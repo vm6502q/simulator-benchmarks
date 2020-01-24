@@ -35,10 +35,12 @@ def _core_sycamore_circuit(reg: List[int], depth: int) -> Program:
     """
 
     num_qubits = len(reg)
-    gateSequence = [ 0, 3, 1, 2, 1, 2, 0, 3 ]
+    gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
     sequenceRowStart = [ 1, 1, 0, 0 ]
     single_bit_gates = sqrtx, sqrty, H # H should actually be sqrth
     circ = []
+
+    lastSingleBitGates = []
 
     rowLen = math.floor(math.sqrt(num_qubits))
     while (((num_qubits / rowLen) * rowLen) != num_qubits):
@@ -47,9 +49,16 @@ def _core_sycamore_circuit(reg: List[int], depth: int) -> Program:
 
     for i in range(depth):
         # Single bit gates
-        for j in range(len(reg)):
+        singleBitGates = []
+        for j in range(num_qubits):
             gate = random.choice(single_bit_gates)
+            if len(lastSingleBitGates) > 0:
+                while gate == lastSingleBitGates[j]:
+                    gate = random.choice(single_bit_gates)
             circ.append(gate(reg[j]))
+            singleBitGates.append(gate)
+
+        lastSingleBitGates = singleBitGates
 
         gate = gateSequence[0]
         gateSequence.pop(0)

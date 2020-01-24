@@ -36,26 +36,38 @@ def sqrtx(circ, t):
 def sqrty(circ, t):
     circ.ry(math.pi / 2, t)
 
-def sqrth(circ, t):
-    # To 18 digits of precision for the angle parameters:
-    circ.u3(1.04719755119659775, 0.955316618124509278, 2.18627603546528396, t)
+def sqrtw(circ, t):
+    circ.unitary([[(1-1j)/2, 1/math.sqrt(2)+0j], [1j/math.sqrt(2), (1-1j)/2]], [t])
 
 # Implementation of Sycamore circuit
 def sycamore_circuit(num_qubits, depth, circ):
-    gateSequence = [ 0, 3, 1, 2, 1, 2, 0, 3 ]
+    gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
     sequenceRowStart = [ 1, 1, 0, 0 ]
-    single_bit_gates = sqrtx, sqrty, sqrth
+    single_bit_gates = sqrtx, sqrty, sqrtw
 
     rowLen = math.floor(math.sqrt(num_qubits))
     while (((num_qubits / rowLen) * rowLen) != num_qubits):
         rowLen = rowLen - 1;
     colLen = num_qubits / rowLen;
 
+    lastSingleBitGates = []
+
     for i in range(depth):
         # Single bit gates
         for j in range(num_qubits):
             gate = random.choice(single_bit_gates)
             gate(circ, j)
+
+        singleBitGates = []
+        for j in range(num_qubits):
+            gate = random.choice(single_bit_gates)
+            if len(lastSingleBitGates) > 0:
+                while gate == lastSingleBitGates[j]:
+                    gate = random.choice(single_bit_gates)
+            gate(circ, j)
+            singleBitGates.append(gate)
+
+        lastSingleBitGates = singleBitGates
 
         gate = gateSequence[0]
         gateSequence.pop(0)
