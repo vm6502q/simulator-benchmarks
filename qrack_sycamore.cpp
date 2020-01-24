@@ -49,14 +49,18 @@ int main()
 
         bitLenInt controls[1];
 
+        std::set<int> gateChoices = { 0, 1, 2 };
+        std::set<int>::iterator gateChoiceIterator;
+
         // We repeat the entire prepartion for "depth" iterations.
         // We can avoid maximal representational entanglement of the state as a single Schr{\"o}dinger method unit.
         // See https://arxiv.org/abs/1710.05867
         for (d = 0; d < depth; d++) {
+            std::vector<bitLenInt> lastSingleBitGates;
             for (i = 0; i < n; i++) {
                 gateRand = qReg->Rand();
 
-                / Each individual bit has one of these 3 gates applied at random.
+                // Each individual bit has one of these 3 gates applied at random.
                 // Qrack has optimizations for gates including X, Y, and particularly H, but these "Sqrt" variants
                 // are handled as general single bit gates.
 
@@ -81,7 +85,6 @@ int main()
                     // For all subsequent iterations after the first, we eliminate the choice of the same gate applied
                     // on the immediately previous iteration.
 
-                    std::set<int> gateChoices = { 0, 1, 2 };
                     gateChoiceIterator = gateChoices.begin();
                     std::advance(gateChoiceIterator, lastSingleBitGates[i]);
                     gateChoices.erase(gateChoiceIterator);
@@ -90,12 +93,12 @@ int main()
                     std::advance(gateChoiceIterator, (gateRand < (ONE_R1 / 2)) ? 0 : 1);
                     gateChoices.erase(gateChoiceIterator);
 
-                    gateChoice = *(gateChoices.begin());
+                    gate = *(gateChoices.begin());
 
-                    if (gateChoice == 0) {
+                    if (gate == 0) {
                         qReg->SqrtX(i);
                         lastSingleBitGates[i] = 0;
-                    } else if (gateChoice == 1) {
+                    } else if (gate == 1) {
                         qReg->SqrtY(i);
                         lastSingleBitGates[i] = 1;
                     } else {
