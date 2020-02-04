@@ -11,7 +11,7 @@ import math
 from typing import List
 
 from pyquil import get_qc, Program
-from pyquil.gates import ISWAP, RX, RY, H, CPHASE
+from pyquil.gates import SWAP, RX, RY, H, CPHASE
 
 def sqrtx(t):
     return RX(math.pi / 2, t)
@@ -86,7 +86,7 @@ def _core_sycamore_circuit(reg: List[int], depth: int) -> Program:
 
                 # Two bit gates
                 circ.append(CPHASE(math.pi / 6, reg[b1], reg[b2]))
-                circ.append(ISWAP(reg[b1], reg[b2]))
+                circ.append(SWAP(reg[b1], reg[b2]))
 
     return circ
 
