@@ -8,15 +8,24 @@
 int main()
 {
 
-#if 0
-    // Random permutation initialization: trivial problem for QUnit, but not generally representative
+    // Random permutation basis eigenstate initialization
+    std::cout<<">>>Random Permutation Basis Eigenstate Initialization:"<<std::endl;
     benchmarkLoop(
-        [](QInterfacePtr qftReg, int n) {
+        [](Qrack::QInterfacePtr qftReg, int n, int unused) {
             qftReg->QFT(0, n, false);
-    }, true, false, testEngineType == QINTERFACE_QUNIT);
-#endif
+            qftReg->MReg(0, n);
+        }, 1, 1, true, false, false, false);
+
+    // Random permutation basis eigenstate, with random Hadamard gates initialization
+    std::cout<<">>>Random Permutation Basis w/ Random Hadamard Initialization:"<<std::endl;
+    benchmarkLoop(
+        [](Qrack::QInterfacePtr qftReg, int n, int unused) {
+            qftReg->QFT(0, n, false);
+            qftReg->MReg(0, n);
+        }, 1, 1, true, true, false, false);
 
     // Totally random, totally separable qubits, for initialization
+    std::cout<<">>>Random Separable Bits:"<<std::endl;
     benchmarkLoop(
         [](Qrack::QInterfacePtr qftReg, int n, int unused) {
             qftReg->QFT(0, n, false);
