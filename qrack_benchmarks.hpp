@@ -22,9 +22,14 @@ double formatTime(double t, bool logNormal)
     }
 }
 
-Qrack::QInterfacePtr MakeRandQubit()
+Qrack::QInterfacePtr MakeRandQubit(bool multi = false)
 {
-    Qrack::QInterfacePtr qubit = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, 1, 0);
+    Qrack::QInterfacePtr qubit;
+    if (multi) {
+        qubit = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT_MULTI, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, 1, 0);
+    } else {
+        qubit = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, 1, 0);
+    }
 
     Qrack::real1 prob = qubit->Rand();
     Qrack::complex phaseFactor = std::polar(ONE_R1, (Qrack::real1)(2 * M_PI * qubit->Rand()));
@@ -36,10 +41,15 @@ Qrack::QInterfacePtr MakeRandQubit()
 }
 
 void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> fn, bitLenInt mxQbts, int minDepth = 1, int maxDepth = 1, bool resetRandomPerm = true,
-    bool hadamardRandomBits = false, bool logNormal = false, bool randQubits = false)
+    bool hadamardRandomBits = false, bool logNormal = false, bool randQubits = false, bool multi = false)
 {
     // Get OpenCL header out of the way:
-    Qrack::QInterfacePtr qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, 1, 0);
+    Qrack::QInterfacePtr qftReg;
+    if (multi) {
+        qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT_MULTI, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, 1, 0);
+    } else {
+        qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, 1, 0);
+    }
 
     std::cout << std::endl;
     std::cout << ITERATIONS << " iterations" << std::endl;
@@ -64,7 +74,7 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
         for (depth = minDepth; depth <= maxDepth; depth++) {
 
             if (!randQubits) {
-                qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, numBits, 0);
+                qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT_MULTI, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, numBits, 0);
             }
 
             avgt = 0.0;
@@ -74,9 +84,9 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
                 if (randQubits) {
                     for (bitLenInt b = 0; b < numBits; b++) {
                         if (b == 0) {
-                            qftReg = MakeRandQubit();
+                            qftReg = MakeRandQubit(multi);
                         } else {
-                            qftReg->Compose(MakeRandQubit());
+                            qftReg->Compose(MakeRandQubit(multi));
                         }
                     }
                 } else if (resetRandomPerm) {
@@ -152,7 +162,7 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
 }
 
 void benchmarkLoop(std::function<void(Qrack::QInterfacePtr, int, int)> fn, int minDepth = 1, int maxDepth = 1, bool resetRandomPerm = true,
-    bool hadamardRandomBits = false, bool logNormal = false, bool randQubits = false)
+    bool hadamardRandomBits = false, bool logNormal = false, bool randQubits = false, bool multi = false)
 {
-    benchmarkLoopVariable(fn, MAX_QUBITS, minDepth, maxDepth, resetRandomPerm, hadamardRandomBits, logNormal, randQubits);
+    benchmarkLoopVariable(fn, MAX_QUBITS, minDepth, maxDepth, resetRandomPerm, hadamardRandomBits, logNormal, randQubits, multi);
 }
