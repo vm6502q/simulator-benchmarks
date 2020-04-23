@@ -64,6 +64,9 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
         for (depth = minDepth; depth <= maxDepth; depth++) {
 
             if (!randQubits) {
+                if (qftReg != NULL) {
+                    qftReg.reset();
+                }
                 qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, numBits, 0);
             }
 
@@ -74,6 +77,9 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
                 if (randQubits) {
                     for (bitLenInt b = 0; b < numBits; b++) {
                         if (b == 0) {
+                            if (qftReg != NULL) {
+                                qftReg.reset();
+                            }
                             qftReg = MakeRandQubit();
                         } else {
                             qftReg->Compose(MakeRandQubit());
