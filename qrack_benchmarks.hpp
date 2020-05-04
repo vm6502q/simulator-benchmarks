@@ -24,7 +24,7 @@ double formatTime(double t, bool logNormal)
 
 Qrack::QInterfacePtr MakeRandQubit()
 {
-    Qrack::QInterfacePtr qubit = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, 1, 0);
+    Qrack::QInterfacePtr qubit = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_OPTIMAL, 1, 0);
 
     Qrack::real1 prob = qubit->Rand();
     Qrack::complex phaseFactor = std::polar(ONE_R1, (Qrack::real1)(2 * M_PI * qubit->Rand()));
@@ -39,7 +39,7 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
     bool hadamardRandomBits = false, bool logNormal = false, bool randQubits = false)
 {
     // Get OpenCL header out of the way:
-    Qrack::QInterfacePtr qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, 1, 0);
+    Qrack::QInterfacePtr qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_OPTIMAL, 1, 0);
 
     std::cout << std::endl;
     std::cout << ITERATIONS << " iterations" << std::endl;
@@ -67,7 +67,7 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
                 if (qftReg != NULL) {
                     qftReg.reset();
                 }
-                qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_QFUSION, Qrack::QINTERFACE_OPTIMAL, numBits, 0);
+                qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_OPTIMAL, numBits, 0);
             }
 
             avgt = 0.0;
