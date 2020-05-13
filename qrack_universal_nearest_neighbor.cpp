@@ -162,6 +162,9 @@ int main()
                     gateRand = qReg->Rand();
 
                     if (gateRand < (ONE_R1 / 2)) {
+                        if (qReg->Rand() < (ONE_R1 / 2)) {
+                           std::swap(b1, b2);
+                        }
                         qReg->CNOT(b1, b2);
                     } else {
                         qReg->CZ(b1, b2);
