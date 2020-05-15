@@ -166,11 +166,15 @@ int main()
                     controls[0] = b1;
                     qReg->ApplyControlledSinglePhase(controls, 1U, b2, ONE_CMPLX, sixthRoot);
                     // Note that these gates are both symmetric under exchange of "b1" and "b2".
+
+                    std::cout<<"("<<b1<<", "<<b2<<")"<<std::endl;
                 }
             }
+            std::cout<<"Depth++"<<std::endl;
         }
+        std::cout<<"New iteration."<<std::endl;
 
         // We measure all bits once, after the circuit is run.
         qReg->MReg(0, n);
-    }, 1, 20);
+    }, 20, 20);
 }
