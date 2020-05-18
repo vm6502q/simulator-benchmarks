@@ -16,23 +16,20 @@ int main()
         // The test runs 2 bit gates according to a tiling sequence.
         // The 1 bit indicates +/- column offset.
         // The 2 bit indicates +/- row offset.
-        // This is the "ABCDCDAB" pattern.
+        // This is the "ABCDCDAB" pattern, from the Cirq definition of the circuit in the supplemental materials to the
+        // paper.
         std::list<bitLenInt> gateSequence = { 0, 3, 2, 1, 2, 1, 0, 3 };
 
-        // Depending on which element of the sequential tiling we're running, per depth iteration,
-        // we need to start either with row "0" or row "1".
-        std::map<bitLenInt, bitLenInt> sequenceRowStart;
-        sequenceRowStart[0] = 1;
-        sequenceRowStart[1] = 1;
-        sequenceRowStart[2] = 0;
-        sequenceRowStart[3] = 0;
-
         // We factor the qubit count into two integers, as close to a perfect square as we can.
-        int rowLen = std::sqrt(n);
-        while (((n / rowLen) * rowLen) != n) {
-            rowLen--;
+        int colLen = std::sqrt(n);
+        while (((n / colLen) * colLen) != n) {
+            colLen--;
         }
-        int colLen = n / rowLen;
+        int rowLen = n / colLen;
+
+        // std::cout<<"n="<<(int)n<<std::endl;
+        // std::cout<<"rowLen="<<(int)rowLen<<std::endl;
+        // std::cout<<"colLen="<<(int)colLen<<std::endl;
 
         real1 gateRand;
         bitLenInt gate;
@@ -41,15 +38,9 @@ int main()
         int row, col;
         int tempRow, tempCol;
 
-        bool startsEvenRow;
-
         std::vector<int> lastSingleBitGates;
-        std::vector<int> lastTwoBitGates;
         std::set<int>::iterator gateChoiceIterator;
         int gateChoice;
-
-        // Start all bits in equal superposition.
-        qReg->H(0, n);
 
         // We repeat the entire prepartion for "depth" iterations.
         // We can avoid maximal representational entanglement of the state as a single Schr{\"o}dinger method unit.
@@ -121,10 +112,8 @@ int main()
             gateSequence.pop_front();
             gateSequence.push_back(gate);
 
-            startsEvenRow = ((sequenceRowStart[gate] & 1U) == 0U);
-
-            for (row = sequenceRowStart[gate]; row < (int)(n / rowLen); row += 2) {
-                for (col = 0; col < (int)(n / colLen); col++) {
+            for (row = 1; row < rowLen; row += 2) {
+                for (col = 0; col < colLen; col++) {
                     // The following pattern is isomorphic to a 45 degree bias on a rectangle, for couplers.
                     // In this test, the boundaries of the rectangle have no couplers.
                     // In a perfect square, in the interior bulk, one 2 bit gate is applied for every pair of bits,
@@ -136,28 +125,14 @@ int main()
                     tempCol = col;
 
                     tempRow += ((gate & 2U) ? 1 : -1);
-
-                    if (startsEvenRow) {
-                        tempCol += ((gate & 1U) ? 0 : -1);
-                    } else {
-                        tempCol += ((gate & 1U) ? 1 : 0);
-                    }
+                    tempCol += (colLen == 1) ? 0 : ((gate & 1U) ? 1 : 0);
 
                     if ((tempRow < 0) || (tempCol < 0) || (tempRow >= rowLen) || (tempCol >= colLen)) {
                         continue;
                     }
 
-                    b1 = row * rowLen + col;
-                    b2 = tempRow * rowLen + tempCol;
-
-                    // For the efficiency of QUnit's mapper, we transpose the row and column.
-                    tempCol = b1 / rowLen;
-                    tempRow = b1 - (tempCol * rowLen);
-                    b1 = (tempRow * rowLen) + tempCol;
-
-                    tempCol = b2 / rowLen;
-                    tempRow = b2 - (tempCol * rowLen);
-                    b2 = (tempRow * rowLen) + tempCol;
+                    b1 = row * colLen + col;
+                    b2 = tempRow * colLen + tempCol;
 
                     gateRand = qReg->Rand();
 
