@@ -24,13 +24,14 @@ double formatTime(double t, bool logNormal)
 
 Qrack::QInterfacePtr MakeRandQubit()
 {
-    Qrack::QInterfacePtr qubit = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_OPTIMAL, 1, 0);
+    QInterfacePtr qubit = CreateQuantumInterface(testEngineType, testSubEngineType, testSubSubEngineType, 1U, 0, rng,
+        ONE_CMPLX, enable_normalization, true, false, device_id, !disable_hardware_rng);
 
-    Qrack::real1 prob = qubit->Rand();
-    Qrack::complex phaseFactor = std::polar(ONE_R1, (Qrack::real1)(2 * M_PI * qubit->Rand()));
+    real1 theta = 2 * M_PI * qubit->Rand();
+    real1 phi = 2 * M_PI * qubit->Rand();
+    real1 lambda = 2 * M_PI * qubit->Rand();
 
-    Qrack::complex state[2] = { ((Qrack::real1)sqrt(ONE_R1 - prob)) * Qrack::complex(ONE_R1, ZERO_R1), ((Qrack::real1)sqrt(prob)) * phaseFactor };
-    qubit->SetQuantumState(state);
+    qubit->U(0, theta, phi, lambda);
 
     return qubit;
 }
