@@ -24,12 +24,11 @@ double formatTime(double t, bool logNormal)
 
 Qrack::QInterfacePtr MakeRandQubit()
 {
-    QInterfacePtr qubit = CreateQuantumInterface(testEngineType, testSubEngineType, testSubSubEngineType, 1U, 0, rng,
-        ONE_CMPLX, enable_normalization, true, false, device_id, !disable_hardware_rng);
+    Qrack::QInterfacePtr qubit = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_OPTIMAL, 1U, 0);
 
-    real1 theta = 2 * M_PI * qubit->Rand();
-    real1 phi = 2 * M_PI * qubit->Rand();
-    real1 lambda = 2 * M_PI * qubit->Rand();
+    Qrack::real1 theta = 4 * M_PI * qubit->Rand();
+    Qrack::real1 phi = 2 * M_PI * qubit->Rand();
+    Qrack::real1 lambda = 2 * M_PI * qubit->Rand();
 
     qubit->U(0, theta, phi, lambda);
 
