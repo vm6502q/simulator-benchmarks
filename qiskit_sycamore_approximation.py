@@ -42,13 +42,12 @@ def sqrtw(circ, t):
 # Implementation of Sycamore circuit
 def sycamore_circuit(num_qubits, depth, circ):
     gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
-    sequenceRowStart = [ 1, 1, 0, 0 ]
     single_bit_gates = sqrtx, sqrty, sqrtw
 
-    rowLen = math.floor(math.sqrt(num_qubits))
-    while (((num_qubits / rowLen) * rowLen) != num_qubits):
-        rowLen = rowLen - 1;
-    colLen = num_qubits / rowLen;
+    colLen = math.floor(math.sqrt(num_qubits))
+    while (((num_qubits / colLen) * colLen) != num_qubits):
+        colLen = colLen - 1
+    rowLen = num_qubits // colLen;
 
     lastSingleBitGates = []
 
@@ -73,25 +72,20 @@ def sycamore_circuit(num_qubits, depth, circ):
         gateSequence.pop(0)
         gateSequence.append(gate)
 
-        startsEvenRow = (sequenceRowStart[gate] == 0)
-
-        for row in range(sequenceRowStart[gate], math.floor(num_qubits / rowLen), 2):
-            for col in range(0, math.floor(num_qubits / colLen)):
-                tempRow = row
-                tempCol = col
+        for row in range(1, rowLen, 2):
+            for col in range(0, colLen):
+                tempRow = row;
+                tempCol = col;
 
                 tempRow = tempRow + (1 if (gate & 2) else -1)
-
-                if startsEvenRow:
-                    tempCol = tempCol + (0 if (gate & 1) else -1)
-                else:
+                if colLen != 1:
                     tempCol = tempCol + (1 if (gate & 1) else 0)
 
                 if (tempRow < 0) or (tempCol < 0) or (tempRow >= rowLen) or (tempCol >= colLen):
-                    continue
+                    continue;
 
-                b1 = row * rowLen + col;
-                b2 = tempRow * rowLen + tempCol;
+                b1 = row * colLen + col;
+                b2 = tempRow * colLen + tempCol;
 
                 # Two bit gates
                 circ.cu1(math.pi / 6, b1, b2)

@@ -14,7 +14,6 @@ int main()
     // See https://doi.org/10.1038/s41586-019-1666-5
 
     benchmarkLoop([&](QInterfacePtr qReg, int n, int depth) {
-
         // The test runs 2 bit gates according to a tiling sequence.
         // The 1 bit indicates +/- column offset.
         // The 2 bit indicates +/- row offset.
@@ -87,11 +86,11 @@ int main()
                     gateChoices.erase(gateChoiceIterator);
 
                     gateChoiceIterator = gateChoices.begin();
-                    if (gateRand == 1) {
-                        gateChoice = *(gateChoices.rbegin());
-                    } else {
-                        std::advance(gateChoiceIterator, (int)(gateRand * 2));
+                    gateRand = (int)(gateRand * 2);
+                    if (gateRand > 1) {
+                        gateRand--;
                     }
+                    std::advance(gateChoiceIterator, (int)(gateRand * 2));
                     gateChoice = *gateChoiceIterator;
 
                     if (gateChoice == 0) {
