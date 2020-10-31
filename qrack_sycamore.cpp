@@ -154,6 +154,6 @@ int main()
         // std::cout<<"New iteration."<<std::endl;
 
         // We measure all bits once, after the circuit is run.
-        qReg->MReg(0, n);
-    }, 20, 20);
+        qftReg->MAll();
+    }, 2, 20);
 }

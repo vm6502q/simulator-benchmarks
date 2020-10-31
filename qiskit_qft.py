@@ -8,7 +8,7 @@ import os.path
 import math
 
 from qiskit import QuantumCircuit
-from qiskit import execute, BasicAer
+from qiskit import execute, Aer
 
 # Implementation of the Quantum Fourier Transform
 def qft(num_qubits, circ):
@@ -22,7 +22,7 @@ def qft(num_qubits, circ):
 
     return circ
 
-sim_backend = BasicAer.get_backend('qasm_simulator')
+sim_backend = Aer.get_backend('qasm_simulator')
 
 def bench(num_qubits):
     circ = QuantumCircuit(num_qubits, num_qubits)

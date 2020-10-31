@@ -39,7 +39,7 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
     bool hadamardRandomBits = false, bool logNormal = false, bool randQubits = false)
 {
     // Get OpenCL header out of the way:
-    Qrack::QInterfacePtr qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_OPTIMAL, 1, 0);
+    Qrack::QInterfacePtr qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_OPENCL, 1, 0);
 
     std::cout << std::endl;
     std::cout << ITERATIONS << " iterations" << std::endl;

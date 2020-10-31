@@ -13,7 +13,7 @@ int main()
     benchmarkLoop(
         [](Qrack::QInterfacePtr qftReg, int n, int unused) {
             qftReg->QFT(0, n, false);
-            qftReg->MReg(0, n);
+            qftReg->MAll();
         }, 1, 1, true, false, false, false);
 
     // Random permutation basis eigenstate, with random Hadamard gates initialization
@@ -21,7 +21,7 @@ int main()
     benchmarkLoop(
         [](Qrack::QInterfacePtr qftReg, int n, int unused) {
             qftReg->QFT(0, n, false);
-            qftReg->MReg(0, n);
+            qftReg->MAll();
         }, 1, 1, true, true, false, false);
 
     // Totally random, totally separable qubits, for initialization
@@ -29,6 +29,6 @@ int main()
     benchmarkLoop(
         [](Qrack::QInterfacePtr qftReg, int n, int unused) {
             qftReg->QFT(0, n, false);
-            qftReg->MReg(0, n);
+            qftReg->MAll();
         }, 1, 1, false, false, false, true);
 }

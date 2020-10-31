@@ -31,7 +31,6 @@ int main()
             bitLenInt i;
             real1 gateRand;
             bitLenInt b1, b2, b3;
-            complex polar0;
             int maxGates;
 
             for (d = 0; d < Depth; d++) {
@@ -51,7 +50,8 @@ int main()
 
                 std::set<bitLenInt> unusedBits;
                 for (i = 0; i < n; i++) {
-                    //qReg->TrySeparate(i);
+                    // In the past, "qReg->TrySeparate(i)" was also used, here, to attempt optimization. Be aware that
+                    // the method can give performance advantages, under opportune conditions, but it does not, here.
                     unusedBits.insert(unusedBits.end(), i);
                 }
 
@@ -80,7 +80,7 @@ int main()
                 }
             }
 
-            qReg->MReg(0, n);
+            qReg->MAll();
         },
-        1, 20, false, false, false);
+        2, 20, false, false, false);
 }
