@@ -12,11 +12,12 @@ bitLenInt pickRandomBit(QInterfacePtr qReg, std::set<bitLenInt>* unusedBitsPtr)
     std::set<bitLenInt>::iterator bitIterator = unusedBitsPtr->begin();
     bitLenInt bitRand = unusedBitsPtr->size() * qReg->Rand();
     if (bitRand >= unusedBitsPtr->size()) {
-        bitRand = unusedBitsPtr->size() - 1;
+        bitRand = unusedBitsPtr->size() - 1U;
     }
     std::advance(bitIterator, bitRand);
+    bitRand = *bitIterator;
     unusedBitsPtr->erase(bitIterator);
-    return *bitIterator;
+    return bitRand;
 }
 
 int main()
@@ -82,5 +83,5 @@ int main()
 
             qReg->MAll();
         },
-        2, 20, false, false, false);
+        1, 20, false, false, false);
 }

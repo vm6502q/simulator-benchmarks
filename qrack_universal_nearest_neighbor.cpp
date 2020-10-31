@@ -150,5 +150,5 @@ int main()
 
         // We measure all bits once, after the circuit is run.
         qReg->MAll();
-    }, 2, 20);
+    }, 1, 20);
 }
