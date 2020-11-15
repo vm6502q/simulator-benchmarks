@@ -8,7 +8,7 @@ import os.path
 import math
 
 from qiskit import QuantumCircuit
-from qiskit import execute, BasicAer
+from qiskit import execute, Aer
 
 # Decomposition of ISWAP
 # With this decomposition, Qiskit can readily simulate the Sycamore chip benchmark.
@@ -88,7 +88,7 @@ def sycamore_circuit(num_qubits, depth, circ):
                 b2 = tempRow * colLen + tempCol;
 
                 # Two bit gates
-                circ.cu1(math.pi / 6, b1, b2)
+                circ.cp(math.pi / 6, b1, b2)
                 #iswap(circ, b1, b2)
                 swap(circ, b1, b2)
 
@@ -97,7 +97,7 @@ def sycamore_circuit(num_qubits, depth, circ):
 
     return circ
 
-sim_backend = BasicAer.get_backend('qasm_simulator')
+sim_backend = Aer.get_backend('qasm_simulator')
 
 def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)

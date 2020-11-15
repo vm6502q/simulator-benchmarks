@@ -15,7 +15,7 @@ def qft(num_qubits, circ):
     # Quantum Fourier Transform
     for j in range(num_qubits):
         for k in range(j):
-            circ.cu1(math.pi/float(2**(j-k)), j, k)
+            circ.cp(math.pi/float(2**(j-k)), j, k)
         circ.h(j)
     for j in range(num_qubits):
         circ.measure(j, j)
