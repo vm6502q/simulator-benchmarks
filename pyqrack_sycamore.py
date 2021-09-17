@@ -123,8 +123,11 @@ def benchmark(samples, qubits, depth, out, single):
 
             # Run the benchmarks
             for i in range(samples):
-                t = bench(sim, d+1)
-                write_csv(writer, {'name': 'pyqrack_sycamore', 'num_qubits': n+1, 'depth': d+1, 'time': t})
+                try:
+                    t = bench(sim, d+1)
+                    write_csv(writer, {'name': 'pyqrack_sycamore', 'num_qubits': n+1, 'depth': d+1, 'time': t})
+                except:
+                    write_csv(writer, {'name': 'pyqrack_sycamore', 'num_qubits': n+1, 'depth': d+1, 'time': 'failure'})
 
 if __name__ == '__main__':
     benchmark()
