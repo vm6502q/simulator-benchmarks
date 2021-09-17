@@ -24,7 +24,7 @@ double formatTime(double t, bool logNormal)
 
 Qrack::QInterfacePtr MakeRandQubit()
 {
-    Qrack::QInterfacePtr qubit = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_OPTIMAL, 1U, 0);
+    Qrack::QInterfacePtr qubit = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_OPTIMAL_MULTI, 1U, 0);
 
     Qrack::real1 theta = 4 * M_PI * qubit->Rand();
     Qrack::real1 phi = 2 * M_PI * qubit->Rand();
@@ -51,7 +51,7 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
     std::cout << "1st Quartile (ms), ";
     std::cout << "Median (ms), ";
     std::cout << "3rd Quartile (ms), ";
-    std::cout << "Slowest (ms)" << std::endl;
+    std::cout << "Slowest (ms)," << std::endl;
 
     clock_t tClock, iterClock;
     Qrack::real1 trialClocks[ITERATIONS];
@@ -60,16 +60,9 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
 
     double avgt, stdet;
 
-    for (numBits = 4; numBits <= MAX_QUBITS; numBits++) {
+    for (numBits = 4; numBits <= 28; numBits++) {
+        qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_OPTIMAL_MULTI, numBits, 0);
         for (depth = minDepth; depth <= maxDepth; depth++) {
-
-            if (!randQubits) {
-                if (qftReg != NULL) {
-                    qftReg.reset();
-                }
-                qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_QUNIT, Qrack::QINTERFACE_OPTIMAL, numBits, 0);
-            }
-
             avgt = 0.0;
 
             for (i = 0; i < ITERATIONS; i++) {
@@ -77,9 +70,6 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
                 if (randQubits) {
                     for (bitLenInt b = 0; b < numBits; b++) {
                         if (b == 0) {
-                            if (qftReg != NULL) {
-                                qftReg.reset();
-                            }
                             qftReg = MakeRandQubit();
                         } else {
                             qftReg->Compose(MakeRandQubit());
