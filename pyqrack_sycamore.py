@@ -18,11 +18,14 @@ def sqrty(circ, t):
 def sqrtw(circ, t):
     circ.mtrx([(1-1j)/2, 1/math.sqrt(2)+0j, 1j/math.sqrt(2), (1-1j)/2], t)
 
-# Implementation of Sycamore circuit
-def sycamore_circuit(depth, circ):
+def bench(sim, depth):
+    sim.reset_all()
     gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
     single_bit_gates = sqrtx, sqrty, sqrtw
-    num_qubits = circ.num_qubits()
+
+    start = time.time()
+
+    num_qubits = sim.num_qubits()
 
     colLen = math.floor(math.sqrt(num_qubits))
     while (((num_qubits / colLen) * colLen) != num_qubits):
@@ -35,7 +38,7 @@ def sycamore_circuit(depth, circ):
         # Single bit gates
         for j in range(num_qubits):
             gate = random.choice(single_bit_gates)
-            gate(circ, j)
+            gate(sim, j)
 
         singleBitGates = []
         for j in range(num_qubits):
@@ -43,7 +46,7 @@ def sycamore_circuit(depth, circ):
             if len(lastSingleBitGates) > 0:
                 while gate == lastSingleBitGates[j]:
                     gate = random.choice(single_bit_gates)
-            gate(circ, j)
+            gate(sim, j)
             singleBitGates.append(gate)
 
         lastSingleBitGates = singleBitGates
@@ -68,18 +71,14 @@ def sycamore_circuit(depth, circ):
                 b2 = tempRow * colLen + tempCol;
 
                 # Two bit gates
-                circ.mcmtrx([b1], [1, 0, 0, pow(-1, math.pi / 6)], b2)
-                circ.iswap(b1, b2)
+                sim.mcmtrx([b1], [1, 0, 0, pow(-1, math.pi / 6)], b2)
+                sim.iswap(b1, b2)
 
-    circ.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
-
-    return circ
-
-def bench(sim, depth):
-    sim.reset_all()
-    start = time.time()
-    sycamore_circuit(depth, sim)
-    return time.time() - start
+    try:
+        sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
+        return time.time() - start
+    except:
+        return 'failure'
 
 # Reporting
 def create_csv(filename):
@@ -123,11 +122,8 @@ def benchmark(samples, qubits, depth, out, single):
 
             # Run the benchmarks
             for i in range(samples):
-                try:
-                    t = bench(sim, d+1)
-                    write_csv(writer, {'name': 'pyqrack_sycamore', 'num_qubits': n+1, 'depth': d+1, 'time': t})
-                except:
-                    write_csv(writer, {'name': 'pyqrack_sycamore', 'num_qubits': n+1, 'depth': d+1, 'time': 'failure'})
+                t = bench(sim, d+1)
+                write_csv(writer, {'name': 'pyqrack_sycamore', 'num_qubits': n+1, 'depth': d+1, 'time': t})
 
 if __name__ == '__main__':
     benchmark()

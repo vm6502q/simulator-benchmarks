@@ -23,8 +23,11 @@ def bench(sim):
         sim.u(i, random.uniform(0, 2 * math.pi), random.uniform(0, 2 * math.pi), random.uniform(0, 2 * math.pi))
     start = time.time()
     sim.qft([i for i in range(num_qubits)])
-    sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
-    return time.time() - start
+    try:
+        sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
+        return time.time() - start
+    except:
+        return 'failure'
 
 # Reporting
 def create_csv(filename):
@@ -68,11 +71,8 @@ def benchmark(samples, qubits, out, single):
 
         # Run the benchmarks
         for i in range(samples):
-            try:
-                t = bench(sim)
-                write_csv(writer, {'name': 'pyqrack_qft', 'num_qubits': n+1, 'time': t})
-            except:
-                write_csv(writer, {'name': 'pyqrack_qft', 'num_qubits': n+1, 'time': 'failure'})
+            t = bench(sim)
+            write_csv(writer, {'name': 'pyqrack_qft', 'num_qubits': n+1, 'time': t})
 
 if __name__ == '__main__':
     benchmark()

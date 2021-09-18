@@ -22,10 +22,14 @@ def toffoli(circ, q1, q2, q3):
     circ.mcx([q1, q2], q3)
 
 # Implementation of random universal circuit
-def rand_circuit(depth, circ):
-    single_bit_gates = circ.h, circ.x, circ.y, circ.z, circ.t
+def bench(sim, depth):
+    sim.reset_all()
+    single_bit_gates = sim.h, sim.x, sim.y, sim.z, sim.t
     multi_bit_gates = swap, cx, cz, toffoli
-    num_qubits = circ.num_qubits()
+
+    start = time.time()
+
+    num_qubits = sim.num_qubits()
 
     for i in range(depth):
         # Single bit gates
@@ -46,19 +50,15 @@ def rand_circuit(depth, circ):
             if gate == toffoli:
                 b3 = random.choice(bit_set)
                 bit_set.remove(b3)
-                gate(circ, b1, b2, b3)
+                gate(sim, b1, b2, b3)
             else:
-                gate(circ, b1, b2)
+                gate(sim, b1, b2)
 
-    circ.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
-
-    return circ
-
-def bench(sim, depth):
-    sim.reset_all()
-    start = time.time()
-    rand_circuit(depth, sim)
-    return time.time() - start
+    try:
+        sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
+        return time.time() - start
+    except:
+        return 'failure'
 
 # Reporting
 def create_csv(filename):
