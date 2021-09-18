@@ -23,11 +23,9 @@ def bench(sim):
         sim.u(i, random.uniform(0, 2 * math.pi), random.uniform(0, 2 * math.pi), random.uniform(0, 2 * math.pi))
     start = time.time()
     sim.qft([i for i in range(num_qubits)])
-    try:
-        sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
-        return time.time() - start
-    except:
-        return 'failure'
+    sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
+
+    return time.time() - start
 
 # Reporting
 def create_csv(filename):

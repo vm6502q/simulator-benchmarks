@@ -74,11 +74,9 @@ def bench(sim, depth):
                 sim.mcmtrx([b1], [1, 0, 0, pow(-1, math.pi / 6)], b2)
                 sim.iswap(b1, b2)
 
-    try:
-        sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
-        return time.time() - start
-    except:
-        return 'failure'
+    sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
+
+    return time.time() - start
 
 # Reporting
 def create_csv(filename):

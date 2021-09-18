@@ -54,11 +54,9 @@ def bench(sim, depth):
             else:
                 gate(sim, b1, b2)
 
-    try:
-        sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
-        return time.time() - start
-    except:
-        return 'failure'
+    sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
+
+    return time.time() - start
 
 # Reporting
 def create_csv(filename):
