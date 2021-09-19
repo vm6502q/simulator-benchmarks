@@ -109,7 +109,7 @@ def benchmark(samples, qubits, depth, out, single):
             print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(progress * 50), progress*100), end="", flush=True)
 
             # Run the benchmarks
-            for i in range(samples):
+            for d in [4, 9, 14, 19]:
                 func = random.choice(functions)
                 t = func(n+1, d+1)
                 write_csv(writer, {'name': 'pyquil_random', 'num_qubits': n+1, 'depth': d+1, 'time': t})
