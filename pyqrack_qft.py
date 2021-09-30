@@ -60,7 +60,11 @@ def benchmark(samples, qubits, out, single):
     functions = bench,
     writer = create_csv(out)
 
+    sim = None
     for n in range(low, high):
+        if sim is not None:
+            # Call old simulator width destructor BEFORE initializing new width
+            del sim
         sim = QrackSimulator(n + 1)
 
         # Progress counter
