@@ -91,12 +91,9 @@ def benchmark(samples, qubits, depth, out, single):
 
     writer = create_csv(out)
 
-    sim = None
     for n in range(low, high):
-        if sim is not None:
-            # Call old simulator width destructor BEFORE initializing new width
-            del sim
         sim = QrackSimulator(n + 1)
+
         for d in [4, 9, 14, 19]:
             # Progress counter
             progress = (((n - low) * depth) + d) / ((high - low) * depth)
@@ -109,6 +106,9 @@ def benchmark(samples, qubits, depth, out, single):
                     write_csv(writer, {'name': 'pyqrack_random', 'num_qubits': n+1, 'depth': d+1, 'time': t})
                 except:
                     write_csv(writer, {'name': 'pyqrack_random', 'num_qubits': n+1, 'depth': d+1, 'time': 'failure'})
+
+        # Call old simulator width destructor BEFORE initializing new width
+        del sim
 
 if __name__ == '__main__':
     benchmark()
