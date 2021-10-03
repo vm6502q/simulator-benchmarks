@@ -42,7 +42,7 @@ def _core_sycamore_circuit(reg: List[int], depth: int) -> Program:
     lastSingleBitGates = []
 
     colLen = math.floor(math.sqrt(num_qubits))
-    while (((num_qubits / colLen) * colLen) != num_qubits):
+    while ((math.floor(num_qubits / colLen) * colLen) != num_qubits):
         colLen = colLen - 1
     rowLen = num_qubits // colLen;
 
