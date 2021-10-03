@@ -1,3 +1,5 @@
+export PYOPENCL_CTX='0'
+
 python3 pyqrack_qft.py --out=pyqrack_qft.csv;
 python3 pyqrack_random_circuit.py --out=pyqrack_random_circuit.csv;
 python3 pyqrack_sycamore.py --out=pyqrack_sycamore.csv;
