@@ -28,7 +28,7 @@ def bench(sim, depth):
     num_qubits = sim.num_qubits()
 
     colLen = math.floor(math.sqrt(num_qubits))
-    while (((num_qubits / colLen) * colLen) != num_qubits):
+    while ((math.floor(num_qubits / colLen) * colLen) != num_qubits):
         colLen = colLen - 1
     rowLen = num_qubits // colLen;
 
