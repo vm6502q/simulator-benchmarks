@@ -54,7 +54,8 @@ def bench(sim, depth):
             else:
                 gate(sim, b1, b2)
 
-    sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
+    qubits = [i for i in range(num_qubits)]
+    sim.measure_shots(qubits, 1)
 
     return time.time() - start
 

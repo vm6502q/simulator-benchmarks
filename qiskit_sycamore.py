@@ -11,7 +11,7 @@ from qiskit import QuantumCircuit
 from qiskit import execute, Aer
 
 def sqrtx(circ, t):
-    circ.rx(math.pi / 2, t)
+    circ.sx(math.pi / 2, t)
 
 def sqrty(circ, t):
     circ.ry(math.pi / 2, t)

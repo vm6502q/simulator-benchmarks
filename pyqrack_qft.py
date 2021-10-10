@@ -22,8 +22,9 @@ def bench(sim):
         # Initialize with uniformly random single qubit gates, across full width.
         sim.u(i, random.uniform(0, 2 * math.pi), random.uniform(0, 2 * math.pi), random.uniform(0, 2 * math.pi))
     start = time.time()
-    sim.qft([i for i in range(num_qubits)])
-    sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
+    qubits = [i for i in range(num_qubits)]
+    sim.qft(qubits)
+    sim.measure_shots(qubits, 1)
 
     return time.time() - start
 

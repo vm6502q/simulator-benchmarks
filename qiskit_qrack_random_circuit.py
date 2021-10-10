@@ -9,6 +9,7 @@ import math
 
 from qiskit import QuantumCircuit
 from qiskit import execute
+from qiskit.compiler.transpiler import transpile
 from qiskit.providers.qrack import QasmSimulator
 
 # Implementation of random universal circuit
@@ -44,12 +45,13 @@ def rand_circuit(num_qubits, depth, circ):
 
     return circ
 
-sim_backend = QasmSimulator()
+sim_backend = QasmSimulator(shots=1)
 
 def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)
     rand_circuit(num_qubits, depth, circ)
     start = time.time()
+    circ = transpile(circ, backend=sim_backend, optimization_level=3)
     job = execute([circ], sim_backend, timeout=600)
     result = job.result()
     return time.time() - start

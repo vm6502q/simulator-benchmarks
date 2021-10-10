@@ -9,10 +9,11 @@ import math
 
 from qiskit import QuantumCircuit
 from qiskit import execute
+from qiskit.compiler.transpiler import transpile
 from qiskit.providers.qrack import QasmSimulator
 
 def sqrtx(circ, t):
-    circ.rx(math.pi / 2, t)
+    circ.sx(t)
 
 def sqrty(circ, t):
     circ.ry(math.pi / 2, t)
@@ -77,12 +78,13 @@ def sycamore_circuit(num_qubits, depth, circ):
 
     return circ
 
-sim_backend = QasmSimulator()
+sim_backend = QasmSimulator(shots=1, is_schmidt_decompose=False, is_stabilizer_hybrid=False, is_1qb_fusion=False)
 
 def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)
     sycamore_circuit(num_qubits, depth, circ)
     start = time.time()
+    circ = transpile(circ, backend=sim_backend, optimization_level=3)
     job = execute([circ], sim_backend, timeout=600)
     result = job.result()
     return time.time() - start
