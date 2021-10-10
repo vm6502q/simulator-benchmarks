@@ -74,7 +74,8 @@ def bench(sim, depth):
                 sim.mcmtrx([b1], [1, 0, 0, pow(-1, math.pi / 6)], b2)
                 sim.iswap(b1, b2)
 
-    sim.measure_pauli([Pauli.PauliZ] * num_qubits, range(num_qubits))
+    qubits = [i for i in range(num_qubits)]
+    sim.measure_shots(qubits, 1)
 
     return time.time() - start
 

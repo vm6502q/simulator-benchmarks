@@ -23,7 +23,7 @@ def qft(num_qubits, circ):
 
     return circ
 
-sim_backend = QasmSimulator(method='statevector_gpu')
+sim_backend = QasmSimulator(shots=1, method='statevector_gpu')
 
 def bench(num_qubits):
     circ = QuantumCircuit(num_qubits, num_qubits)

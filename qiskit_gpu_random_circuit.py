@@ -44,7 +44,7 @@ def rand_circuit(num_qubits, depth, circ):
 
     return circ
 
-sim_backend = QasmSimulator(method='statevector_gpu')
+sim_backend = QasmSimulator(shots=1, method='statevector_gpu')
 
 def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)

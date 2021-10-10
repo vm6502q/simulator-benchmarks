@@ -12,7 +12,7 @@ from qiskit import execute
 from qiskit.providers.qrack import QasmSimulator
 
 def sqrtx(circ, t):
-    circ.rx(math.pi / 2, t)
+    circ.sx(t)
 
 def sqrty(circ, t):
     circ.ry(math.pi / 2, t)
@@ -77,7 +77,7 @@ def sycamore_circuit(num_qubits, depth, circ):
 
     return circ
 
-sim_backend = QasmSimulator()
+sim_backend = QasmSimulator(shots=1, is_schmidt_decompose=False, is_stabilizer_hybrid=False, is_1qb_fusion=False)
 
 def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)

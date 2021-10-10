@@ -23,13 +23,13 @@ def qft(num_qubits, circ):
 
     return circ
 
-sim_backend = QasmSimulator()
+sim_backend = QasmSimulator(shots=1)
 
 def bench(num_qubits):
     circ = QuantumCircuit(num_qubits, num_qubits)
     qft(num_qubits, circ)
     start = time.time()
-    job = execute([circ], sim_backend, timeout=600)
+    job = execute([circ], sim_backend, timeout=600, shots=1)
     result = job.result()
     return time.time() - start
 
