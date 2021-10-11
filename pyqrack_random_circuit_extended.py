@@ -34,7 +34,7 @@ def toffoli(circ, q1, q2, q3):
     circ.mcx([q1, q2], q3)
 
 def antitoffoli(circ, q1, q2, q3):
-    circ.mcx([q1, q2], q3)
+    circ.macx([q1, q2], q3)
 
 # Implementation of random universal circuit
 def bench(sim, depth):
