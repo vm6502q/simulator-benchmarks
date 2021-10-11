@@ -52,7 +52,8 @@ def accz(circ, q1, q2, q3):
 def bench(sim, depth):
     sim.reset_all()
     single_bit_gates = sim.h, sim.x, sim.y, sim.z, sim.t, sim.s, sim.adjt, sim.adjs
-    multi_bit_gates = swap, cx, cz, cy, acx, acz, acy, ccx, ccy, ccz, accx, accy, accz
+    two_bit_gates = swap, cx, cz, cy, acx, acz, acy
+    three_bit_gates = ccx, ccy, ccz, accx, accy, accz
 
     start = time.time()
 
@@ -71,10 +72,10 @@ def bench(sim, depth):
             bit_set.remove(b1)
             b2 = random.choice(bit_set)
             bit_set.remove(b2)
-            gate = random.choice(multi_bit_gates)
-            while len(bit_set) == 0 and gate == toffoli:
-                gate = random.choice(multi_bit_gates)
-            if gate == toffoli:
+            gate = random.choice(two_bit_gates + three_bit_gates)
+            while len(bit_set) == 0 and gate in three_bit_gates:
+                gate = random.choice(two_bit_gates)
+            if gate in three_bit_gates:
                 b3 = random.choice(bit_set)
                 bit_set.remove(b3)
                 gate(sim, b1, b2, b3)
