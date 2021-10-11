@@ -12,11 +12,17 @@ from pyqrack import QrackSimulator, Pauli
 def cx(circ, q1, q2):
     circ.mcx([q1], q2)
 
+def cy(circ, q1, q2):
+    circ.mcy([q1], q2)
+
 def cz(circ, q1, q2):
     circ.mcz([q1], q2)
 
 def acx(circ, q1, q2):
     circ.macx([q1], q2)
+
+def acy(circ, q1, q2):
+    circ.macy([q1], q2)
 
 def acz(circ, q1, q2):
     circ.macz([q1], q2)
@@ -34,7 +40,7 @@ def antitoffoli(circ, q1, q2, q3):
 def bench(sim, depth):
     sim.reset_all()
     single_bit_gates = sim.h, sim.x, sim.y, sim.z, sim.t, sim.s, sim.adjt, sim.adjs
-    multi_bit_gates = swap, cx, cz, toffoli, acx, acz, antitoffoli
+    multi_bit_gates = swap, cx, cz, toffoli, acx, acz, antitoffoli, cy, acy
 
     start = time.time()
 
