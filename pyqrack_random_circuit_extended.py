@@ -73,7 +73,7 @@ def bench(sim, depth):
             b2 = random.choice(bit_set)
             bit_set.remove(b2)
             gate = random.choice(two_bit_gates + three_bit_gates)
-            while len(bit_set) == 0 and gate in three_bit_gates:
+            if len(bit_set) == 0 and (gate in three_bit_gates):
                 gate = random.choice(two_bit_gates)
             if gate in three_bit_gates:
                 b3 = random.choice(bit_set)
