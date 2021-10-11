@@ -30,17 +30,29 @@ def acz(circ, q1, q2):
 def swap(circ, q1, q2):
     circ.swap(q1, q2)
 
-def toffoli(circ, q1, q2, q3):
-    circ.mcx([q1, q2], q3)
+def ccx(circ, q1, q2):
+    circ.mcx([q1], q2)
 
-def antitoffoli(circ, q1, q2, q3):
+def ccy(circ, q1, q2, q3):
+    circ.mcy([q1, q2], q3)
+
+def ccz(circ, q1, q2, q3):
+    circ.mcz([q1, q2], q3)
+
+def accx(circ, q1, q2, q3):
     circ.macx([q1, q2], q3)
+
+def accy(circ, q1, q2, q3):
+    circ.macy([q1, q2], q3)
+
+def accz(circ, q1, q2, q3):
+    circ.macz([q1, q2], q3)
 
 # Implementation of random universal circuit
 def bench(sim, depth):
     sim.reset_all()
     single_bit_gates = sim.h, sim.x, sim.y, sim.z, sim.t, sim.s, sim.adjt, sim.adjs
-    multi_bit_gates = swap, cx, cz, toffoli, acx, acz, antitoffoli, cy, acy
+    multi_bit_gates = swap, cx, cz, cy, acx, acz, acy, ccx, ccy, ccz, accx, accy, accz
 
     start = time.time()
 
