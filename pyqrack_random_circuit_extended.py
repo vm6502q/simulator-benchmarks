@@ -30,8 +30,8 @@ def acz(circ, q1, q2):
 def swap(circ, q1, q2):
     circ.swap(q1, q2)
 
-def ccx(circ, q1, q2):
-    circ.mcx([q1], q2)
+def ccx(circ, q1, q2, q3):
+    circ.mcx([q1, q2], q2)
 
 def ccy(circ, q1, q2, q3):
     circ.mcy([q1, q2], q3)
