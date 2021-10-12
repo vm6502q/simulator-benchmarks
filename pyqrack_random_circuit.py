@@ -7,6 +7,12 @@ import csv
 import os.path
 import math
 
+from collections import Counter
+
+from qiskit import QuantumCircuit
+from qiskit import execute, Aer
+from qiskit.providers.aer import QasmSimulator
+
 from pyqrack import QrackSimulator, Pauli
 
 def dicts_almost_equal(dict1, dict2, delta=None, places=None, default_value=0):
@@ -79,14 +85,17 @@ def swap(circ, q1, q2):
 def toffoli(circ, q1, q2, q3):
     circ.mcx([q1, q2], q3)
 
-# Implementation of random universal circuit
-def bench(sim, depth, qis):
-    sim.reset_all()
-    single_bit_gates = [sim.h, qis.h], [sim.x, qis.x], [sim.y, qis.y], [sim.z, qis.z], [sim.t, qis.t]
-    multi_bit_gates = [swap, qis.swap], [cx, qis.cx], [cz, qis.cz], [toffoli, qis.ccx]
+sim_backend = QasmSimulator(shots=1000, method='automatic')
 
+# Implementation of random universal circuit
+def bench(sim, depth):
     num_qubits = sim.num_qubits()
     qis = QuantumCircuit(num_qubits, num_qubits)
+    sim.reset_all()
+    single_bit_gates = sim.h, sim.x, sim.y, sim.z, sim.t
+    multi_bit_gates = swap, cx, cz, toffoli
+    qis_single_bit_gates = qis.h, qis.x, qis.y, qis.z, qis.t
+    qis_multi_bit_gates = qis.swap, qis.cx, qis.cz, qis.ccx
 
     start = time.time()
 
@@ -94,8 +103,9 @@ def bench(sim, depth, qis):
         # Single bit gates
         for j in range(num_qubits):
             gate = random.choice(single_bit_gates)
-            gate[0](j)
-            gate[1](j)
+            qisgate = qis_single_bit_gates[single_bit_gates.index(gate)]
+            gate(j)
+            qisgate(j)
 
         # Multi bit gates
         bit_set = [range(num_qubits)]    
@@ -105,36 +115,32 @@ def bench(sim, depth, qis):
             b2 = random.choice(bit_set)
             bit_set.remove(b2)
             gate = random.choice(multi_bit_gates)
-            while len(bit_set) == 0 and gate == [toffoli, qis.ccx]:
+            while len(bit_set) == 0 and gate == toffoli:
                 gate = random.choice(multi_bit_gates)
+            qisgate = qis_multi_bit_gates[qis_multi_bit_gates.index(gate)]
             if gate == toffoli:
                 b3 = random.choice(bit_set)
                 bit_set.remove(b3)
-                gate[0](sim, b1, b2, b3)
-                gate[1](b1, b2, b3)
+                gate(sim, b1, b2, b3)
+                qisgate(b1, b2, b3)
             else:
-                gate[0](sim, b1, b2)
-                gate[1](b1, b2)
-
-    qubits = [i for i in range(num_qubits)]
-    measure_results = sim.measure_shots(qubits, 1000)
-    qrack_result = []
-    for sample in measure_results:
-        for index in range(len(measure_qubit)):
-            qubit_outcome = ((sample >> index) & 1)
-            clbit = measure_clbit[index]
-            clmask = 1 << clbit
-            self._classical_memory = (self._classical_memory & (~clmask)) | (qubit_outcome << clbit)
-
-        qrack_result.append(hex(int(bin(self._classical_memory)[2:], 2)))
+                gate(sim, b1, b2)
+                qisgate(b1, b2)
 
     for j in range(num_qubits):
         qis.measure(j, j)
 
-    job = execute([circ], sim_backend, timeout=600, shots=1000)
-    qiskit_result = job.result()
+    qubits = [i for i in range(num_qubits)]
+    measure_results = sim.measure_shots(qubits, 1000)
+    qrack_result_list = []
+    for sample in measure_results:
+        qrack_result_list.append(hex(int(bin(sample)[2:], 2)))
+    qrack_result = dict(Counter(qrack_result_list))
 
-    if "" != dicts_almost_equal(qrack_result, qiskit_result, delta=50):
+    job = execute(qis, sim_backend, timeout=600, shots=1000)
+    qiskit_result = job.result().results[0].to_dict()['data']['counts']
+
+    if "" != dicts_almost_equal(qrack_result, qiskit_result, delta=100):
         raise Exception("Not within tolerance")
 
     return time.time() - start
@@ -182,11 +188,8 @@ def benchmark(samples, qubits, depth, out, single):
 
             # Run the benchmarks
             for i in range(samples):
-                try:
-                    t = bench(sim, d+1)
-                    write_csv(writer, {'name': 'pyqrack_random', 'num_qubits': n+1, 'depth': d+1, 'time': t})
-                except:
-                    write_csv(writer, {'name': 'pyqrack_random', 'num_qubits': n+1, 'depth': d+1, 'time': 'failure'})
+                t = bench(sim, d+1)
+                write_csv(writer, {'name': 'pyqrack_random', 'num_qubits': n+1, 'depth': d+1, 'time': t})
 
         # Call old simulator width destructor BEFORE initializing new width
         del sim
