@@ -92,8 +92,10 @@ def bench(sim, depth):
     job = execute(qis, sim_backend, timeout=600, shots=10000)
     qiskit_result = job.result().results[0].to_dict()['data']['counts']
 
-    if 1000 < dict_diff(qrack_result, qiskit_result):
-        raise Exception("Not within tolerance")
+    l1diff = dict_diff(qrack_result, qiskit_result)
+
+    if 1200 < l1diff:
+        raise Exception("Not within tolerance: " + str(l1diff))
 
     return time.time() - start
 
