@@ -123,7 +123,7 @@ def benchmark(samples, qubits, depth, out, single):
     for n in range(low, high):
         sim = QrackSimulator(n + 1)
 
-        for d in range(depth):
+        for d in [4, 9, 14, 19]:
             # Progress counter
             progress = (((n - low) * depth) + d) / ((high - low) * depth)
             print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(progress * 50), progress*100), end="", flush=True)
