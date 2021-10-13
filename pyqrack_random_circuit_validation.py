@@ -96,7 +96,16 @@ def bench(sim, depth):
     
     for instruction in gate_list:
         if instruction[0] in single_bit_gates:
-            instruction[0](instruction[1][0])
+            if instruction[0] == sim.s:
+                sim.adjs(instruction[1][0])
+            elif instruction[0] == sim.t:
+                sim.adjt(instruction[1][0])
+            elif instruction[0] == sim.adjs:
+                sim.s(instruction[1][0])
+            elif instruction[0] == sim.adjt:
+                sim.t(instruction[1][0])
+            else:
+                instruction[0](instruction[1][0])
         elif instruction[0] in two_bit_gates:
             instruction[0](instruction[1][0], instruction[1][1])
         else:
