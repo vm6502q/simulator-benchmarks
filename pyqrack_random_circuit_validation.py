@@ -112,7 +112,7 @@ def bench(sim, depth):
             instruction[0](instruction[1][0], instruction[1][1], instruction[1][2])
 
     if sim.measure_shots(qubits, 1)[0] != rand_perm:
-        Exception("Mirroring failed!")
+        raise Exception("Mirroring failed!")
 
 
 @click.command()
