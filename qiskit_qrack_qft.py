@@ -9,7 +9,6 @@ import math
 
 from qiskit import QuantumCircuit
 from qiskit import execute
-from qiskit.compiler.transpiler import transpile
 from qiskit.providers.qrack import QasmSimulator
 
 # Implementation of the Quantum Fourier Transform
@@ -30,7 +29,6 @@ def bench(num_qubits):
     circ = QuantumCircuit(num_qubits, num_qubits)
     qft(num_qubits, circ)
     start = time.time()
-    circ = transpile(circ, backend=sim_backend, optimization_level=3)
     job = execute([circ], sim_backend, timeout=600, shots=1)
     result = job.result()
     return time.time() - start
