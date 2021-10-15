@@ -24,6 +24,7 @@ def bench(sim, depth):
     if rand_perm == (1 << num_qubits):
         rand_perm = rand_perm - 1
 
+    qubits = [i for i in range(num_qubits)]
     for qubit in qubits:
         if ((rand_perm >> qubit) & 1) > 0:
             sim.x(qubit)
@@ -37,10 +38,9 @@ def bench(sim, depth):
             b2 = random.choice(bit_set)
             bit_set.remove(b2)
             b3 = random.choice(bit_set)
-            bit_set.remove(b2)
+            bit_set.remove(b3)
             toffoli(sim, b1, b2, b3)
 
-    qubits = [i for i in range(num_qubits)]
     sim.measure_shots(qubits, 1)
 
     return time.time() - start

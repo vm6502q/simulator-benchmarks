@@ -32,7 +32,7 @@ def rand_circuit(num_qubits, depth, circ):
             b2 = random.choice(bit_set)
             bit_set.remove(b2)
             b3 = random.choice(bit_set)
-            bit_set.remove(b2)
+            bit_set.remove(b3)
             circ.ccx(b1, b2, b3)
 
     for j in range(num_qubits):

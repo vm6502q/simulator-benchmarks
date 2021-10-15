@@ -43,7 +43,7 @@ def _core_random_circuit(reg: List[int], depth: int) -> Program:
             b2 = random.choice(bit_set)
             bit_set.remove(b2)
             b3 = random.choice(bit_set)
-            bit_set.remove(b2)
+            bit_set.remove(b3)
             circ.append(CCNOT(b1, b2, b3))
 
     return circ

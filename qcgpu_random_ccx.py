@@ -45,7 +45,7 @@ def rand_circuit(num_qubits, depth, circ):
             b2 = random.choice(bit_set)
             bit_set.remove(b2)
             b3 = random.choice(bit_set)
-            bit_set.remove(b2)
+            bit_set.remove(b3)
             toffoli(sim, b1, b2, b3)
 
     circ.measure()
