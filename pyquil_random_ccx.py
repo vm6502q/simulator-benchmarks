@@ -30,6 +30,7 @@ def _core_random_circuit(reg: List[int], depth: int) -> Program:
     if rand_perm == (1 << num_qubits):
         rand_perm = rand_perm - 1
 
+    qubits = [i for i in range(num_qubits)]
     for qubit in qubits:
         if ((rand_perm >> qubit) & 1) > 0:
             circ.append(X(qubit))
