@@ -23,7 +23,7 @@ def rand_circuit(num_qubits, depth, circ):
             gate(j)
 
         # Multi bit gates
-        bit_set = [range(num_qubits)]    
+        bit_set = [i for i in range(num_qubits)]
         while len(bit_set) > 1:
             b1 = random.choice(bit_set)
             bit_set.remove(b1)
