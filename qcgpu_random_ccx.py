@@ -7,34 +7,56 @@ import csv
 import os.path
 import math
 
-from qiskit import QuantumCircuit
-from qiskit import execute
-from qiskit.providers.qrack import QasmSimulator
+import qcgpu
+
+def cx(circ, q1, q2):
+    circ.cx(q1, q2)
+
+def cz(circ, q1, q2):
+    circ.cz(q1, q2)
+
+def swap(circ, q1, q2):
+    circ.cx(q1, q2)
+    circ.cx(q2, q1)
+    circ.cx(q1, q2)
+
+def toffoli(circ, q1, q2, q3):
+    circ.toffoli(q1, q2, q3)
 
 # Implementation of random universal circuit
 def rand_circuit(num_qubits, depth, circ):
     single_bit_gates = circ.h, circ.x, circ.y, circ.z, circ.t
-    multi_bit_gates = circ.swap, circ.cx, circ.cz, circ.ccx
+    multi_bit_gates = swap, cx, cz, toffoli
+
+    rand_perm = math.floor((1 << num_qubits) * random.random())
+    if rand_perm == (1 << num_qubits):
+        rand_perm = rand_perm - 1
+
+    for qubit in qubits:
+        if ((rand_perm >> qubit) & 1) > 0:
+            circ.x(qubit)
 
     for i in range(depth):
-        # Single bit gates
-        for j in range(num_qubits):
-            gate = random.choice(single_bit_gates)
-            gate(j)
+        # Multi bit gates
+        bit_set = [i for i in range(num_qubits)]
+        while len(bit_set) > 2:
+            b1 = random.choice(bit_set)
+            bit_set.remove(b1)
+            b2 = random.choice(bit_set)
+            bit_set.remove(b2)
+            b3 = random.choice(bit_set)
+            bit_set.remove(b2)
+            toffoli(sim, b1, b2, b3)
 
-    for j in range(num_qubits):
-        circ.measure(j, j)
+    circ.measure()
 
     return circ
 
-sim_backend = QasmSimulator(shots=1)
-
 def bench(num_qubits, depth):
-    circ = QuantumCircuit(num_qubits, num_qubits)
-    rand_circuit(num_qubits, depth, circ)
     start = time.time()
-    job = execute([circ], sim_backend, timeout=600)
-    result = job.result()
+    state = qcgpu.State(num_qubits)
+    rand_circuit(num_qubits, depth, state)
+    state.backend.queue.finish()
     return time.time() - start
 
 # Reporting
@@ -81,7 +103,7 @@ def benchmark(samples, qubits, depth, out, single):
             for i in range(samples):
                 func = random.choice(functions)
                 t = func(n+1, d+1)
-                write_csv(writer, {'name': 'qiskit_random', 'num_qubits': n+1, 'depth': d+1, 'time': t})
+                write_csv(writer, {'name': 'qcgpu_random', 'num_qubits': n+1, 'depth': d+1, 'time': t})
 
 if __name__ == '__main__':
     benchmark()

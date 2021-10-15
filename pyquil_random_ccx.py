@@ -26,11 +26,25 @@ def _core_random_circuit(reg: List[int], depth: int) -> Program:
     multi_bit_gates = SWAP, CNOT, CZ, CCNOT
     circ = []
 
+    rand_perm = math.floor((1 << num_qubits) * random.random())
+    if rand_perm == (1 << num_qubits):
+        rand_perm = rand_perm - 1
+
+    for qubit in qubits:
+        if ((rand_perm >> qubit) & 1) > 0:
+            circ.append(X(qubit))
+
     for i in range(depth):
-        # Single bit gates
-        for j in range(len(reg)):
-            gate = random.choice(single_bit_gates)
-            circ.append(gate(reg[j]))
+        # Multi bit gates
+        bit_set = [i for i in range(num_qubits)]
+        while len(bit_set) > 2:
+            b1 = random.choice(bit_set)
+            bit_set.remove(b1)
+            b2 = random.choice(bit_set)
+            bit_set.remove(b2)
+            b3 = random.choice(bit_set)
+            bit_set.remove(b2)
+            circ.append(CCNOT(b1, b2, b3))
 
     return circ
 

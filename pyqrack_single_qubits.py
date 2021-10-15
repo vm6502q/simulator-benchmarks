@@ -18,14 +18,6 @@ def bench(sim, depth):
 
     num_qubits = sim.num_qubits()
 
-    rand_perm = math.floor((1 << num_qubits) * random.random())
-    if rand_perm == (1 << num_qubits):
-        rand_perm = rand_perm - 1
-
-    for qubit in qubits:
-        if ((rand_perm >> qubit) & 1) > 0:
-            sim.x(qubit)
-
     for i in range(depth):
         # Single bit gates
         for j in range(num_qubits):

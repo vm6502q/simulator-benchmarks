@@ -7,41 +7,49 @@ import csv
 import os.path
 import math
 
-from qiskit import QuantumCircuit
-from qiskit import execute
-from qiskit.providers.qrack import QasmSimulator
+from pyqrack import QrackSimulator, Pauli
+
+def toffoli(circ, q1, q2, q3):
+    circ.mcx([q1, q2], q3)
 
 # Implementation of random universal circuit
-def rand_circuit(num_qubits, depth, circ):
-    single_bit_gates = circ.h, circ.x, circ.y, circ.z, circ.t
-    multi_bit_gates = circ.swap, circ.cx, circ.cz, circ.ccx
+def bench(sim, depth):
+    sim.reset_all()
+
+    start = time.time()
+
+    num_qubits = sim.num_qubits()
+
+    rand_perm = math.floor((1 << num_qubits) * random.random())
+    if rand_perm == (1 << num_qubits):
+        rand_perm = rand_perm - 1
+
+    for qubit in qubits:
+        if ((rand_perm >> qubit) & 1) > 0:
+            sim.x(qubit)
 
     for i in range(depth):
-        # Single bit gates
-        for j in range(num_qubits):
-            gate = random.choice(single_bit_gates)
-            gate(j)
+        # Multi bit gates
+        bit_set = [i for i in range(num_qubits)]
+        while len(bit_set) > 2:
+            b1 = random.choice(bit_set)
+            bit_set.remove(b1)
+            b2 = random.choice(bit_set)
+            bit_set.remove(b2)
+            b3 = random.choice(bit_set)
+            bit_set.remove(b2)
+            toffoli(sim, b1, b2, b3)
 
-    for j in range(num_qubits):
-        circ.measure(j, j)
+    qubits = [i for i in range(num_qubits)]
+    sim.measure_shots(qubits, 1)
 
-    return circ
-
-sim_backend = QasmSimulator(shots=1)
-
-def bench(num_qubits, depth):
-    circ = QuantumCircuit(num_qubits, num_qubits)
-    rand_circuit(num_qubits, depth, circ)
-    start = time.time()
-    job = execute([circ], sim_backend, timeout=600)
-    result = job.result()
     return time.time() - start
 
 # Reporting
 def create_csv(filename):
     file_exists = os.path.isfile(filename)
     csvfile = open(filename, 'a')
-   
+
     headers = ['name', 'num_qubits', 'depth', 'time']
     writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',fieldnames=headers)
 
@@ -68,10 +76,11 @@ def benchmark(samples, qubits, depth, out, single):
         low = 3
     high = qubits
 
-    functions = bench,
     writer = create_csv(out)
 
     for n in range(low, high):
+        sim = QrackSimulator(n + 1)
+
         for d in [4, 9, 14, 19]:
             # Progress counter
             progress = (((n - low) * depth) + d) / ((high - low) * depth)
@@ -79,9 +88,11 @@ def benchmark(samples, qubits, depth, out, single):
 
             # Run the benchmarks
             for i in range(samples):
-                func = random.choice(functions)
-                t = func(n+1, d+1)
-                write_csv(writer, {'name': 'qiskit_random', 'num_qubits': n+1, 'depth': d+1, 'time': t})
+                t = bench(sim, d+1)
+                write_csv(writer, {'name': 'pyqrack_random', 'num_qubits': n+1, 'depth': d+1, 'time': t})
+
+        # Call old simulator width destructor BEFORE initializing new width
+        del sim
 
 if __name__ == '__main__':
     benchmark()
