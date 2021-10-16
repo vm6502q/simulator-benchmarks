@@ -31,8 +31,8 @@ sim_backend = Aer.get_backend('qasm_simulator')
 def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)
     rand_circuit(num_qubits, depth, circ)
-    circ = transpile(circ, backend=sim_backend, optimization_level=3)
     start = time.time()
+    circ = transpile(circ, backend=sim_backend, optimization_level=3)
     job = execute([circ], sim_backend, timeout=600, shots=1)
     result = job.result()
     return time.time() - start
