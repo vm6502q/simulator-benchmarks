@@ -23,7 +23,6 @@ def _core_random_circuit(reg: List[int], depth: int) -> Program:
     :return: A Quil program to perform the random universal circuit benchmark
     """
     single_bit_gates = H, X, Y, Z, T
-    multi_bit_gates = SWAP, CNOT, CZ, CCNOT
     circ = []
 
     for i in range(depth):

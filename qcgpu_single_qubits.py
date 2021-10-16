@@ -26,7 +26,6 @@ def toffoli(circ, q1, q2, q3):
 # Implementation of random universal circuit
 def rand_circuit(num_qubits, depth, circ):
     single_bit_gates = circ.h, circ.x, circ.y, circ.z, circ.t
-    multi_bit_gates = swap, cx, cz, toffoli
 
     for i in range(depth):
         # Single bit gates

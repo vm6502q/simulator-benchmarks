@@ -12,7 +12,6 @@ from pyqrack import QrackSimulator, Pauli
 def bench(sim, depth):
     sim.reset_all()
     single_bit_gates = sim.h, sim.x, sim.y, sim.z, sim.t
-    multi_bit_gates = swap, cx, cz, toffoli
 
     start = time.time()
 

@@ -14,7 +14,6 @@ from qiskit.providers.qrack import QasmSimulator
 # Implementation of random universal circuit
 def rand_circuit(num_qubits, depth, circ):
     single_bit_gates = circ.h, circ.x, circ.y, circ.z, circ.t
-    multi_bit_gates = circ.swap, circ.cx, circ.cz, circ.ccx
 
     for i in range(depth):
         # Single bit gates
