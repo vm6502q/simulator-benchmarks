@@ -33,10 +33,6 @@ def sycamore_circuit(num_qubits, depth, circ):
 
     for i in range(depth):
         # Single bit gates
-        for j in range(num_qubits):
-            gate = random.choice(single_bit_gates)
-            gate(circ, j)
-
         singleBitGates = []
         for j in range(num_qubits):
             gate = random.choice(single_bit_gates)
