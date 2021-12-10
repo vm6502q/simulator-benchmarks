@@ -24,7 +24,7 @@ def bench(sim):
     start = time.time()
     qubits = [i for i in range(num_qubits)]
     sim.qft(qubits)
-    sim.measure_shots(qubits, 1)
+    sim.m_all()
 
     return time.time() - start
 

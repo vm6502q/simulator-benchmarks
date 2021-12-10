@@ -83,7 +83,7 @@ def bench(sim, depth):
                 gate(sim, b1, b2)
 
     qubits = [i for i in range(num_qubits)]
-    sim.measure_shots(qubits, 1)
+    sim.m_all()
 
     return time.time() - start
 
