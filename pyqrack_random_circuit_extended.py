@@ -130,7 +130,6 @@ def benchmark(samples, qubits, depth, out, single):
 
             # Run the benchmarks
             for i in range(samples):
-                t = bench(sim, d+1)
                 try:
                     t = bench(sim, d + 1)
                     write_csv(writer, {'name': 'pyqrack_random_extended', 'num_qubits': n+1, 'depth': d+1, 'time': t})
