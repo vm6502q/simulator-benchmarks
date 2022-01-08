@@ -113,7 +113,7 @@ def benchmark(samples, qubits, depth, out, single):
     writer = create_csv(out)
 
     for n in range(low, high):
-        sim = QrackSimulator(qubitCount = (n + 1), isSchmidtDecompose=False, isStabilizerHybrid=False, is1QbFusion=False)
+        sim = QrackSimulator(n + 1)
 
         for d in range(depth):
             # Progress counter
