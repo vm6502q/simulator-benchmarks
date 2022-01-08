@@ -70,8 +70,13 @@ def benchmark(samples, qubits, out, single):
 
         # Run the benchmarks
         for i in range(samples):
-            t = bench(sim)
-            write_csv(writer, {'name': 'pyqrack_qft', 'num_qubits': n+1, 'time': t})
+            try:
+                t = bench(sim)
+                write_csv(writer, {'name': 'pyqrack_qft', 'num_qubits': n+1, 'time': t})
+            except:
+                del sim
+                write_csv(writer, {'name': 'pyqrack_qft', 'num_qubits': n+1, 'time': -999})
+                sim = QrackSimulator(n + 1)
 
         # Call old simulator width destructor BEFORE initializing new width
         del sim
