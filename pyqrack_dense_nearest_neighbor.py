@@ -50,29 +50,14 @@ def acz(circ, q1, q2):
 def swap(circ, q1, q2):
     circ.swap(q1, q2)
 
-def ccx(circ, q1, q2, q3):
-    circ.mcx([q1, q2], q2)
-
-def ccy(circ, q1, q2, q3):
-    circ.mcy([q1, q2], q3)
-
-def ccz(circ, q1, q2, q3):
-    circ.mcz([q1, q2], q3)
-
-def accx(circ, q1, q2, q3):
-    circ.macx([q1, q2], q3)
-
-def accy(circ, q1, q2, q3):
-    circ.macy([q1, q2], q3)
-
-def accz(circ, q1, q2, q3):
-    circ.macz([q1, q2], q3)
+def ident(circ, q1, q2):
+    pass
 
 # Implementation of random universal circuit
 def bench(sim, depth):
     sim.reset_all()
     single_bit_gates = x_to_y, x_to_z, y_to_z, y_to_x, z_to_x, z_to_y
-    two_bit_gates = swap, cx, cz, cy, acx, acz, acy
+    two_bit_gates = ident, swap, cx, cz, cy, acx, acz, acy
     gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
     num_qubits = sim.num_qubits()
     colLen = math.floor(math.sqrt(num_qubits))
