@@ -71,7 +71,7 @@ def sycamore_circuit(num_qubits, depth, circ):
                 # Two bit gates
                 circ.cp(math.pi / 6, b1, b2)
                 #iswap(circ, b1, b2)
-                crc.iswap(b1, b2)
+                circ.iswap(b1, b2)
 
     for j in range(num_qubits):
         circ.measure(j, j)
