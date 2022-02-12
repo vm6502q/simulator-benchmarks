@@ -7,7 +7,27 @@ import csv
 import os.path
 import math
 
-from pyqrack import QrackSimulator, Pauli
+from pyqrack import QrackSimulator
+
+def x_to_y(circ, q):
+    circ.s(q)
+
+def x_to_z(circ, q):
+    circ.h(q)
+
+def y_to_z(circ, q):
+    circ.adjs(q)
+    circ.h(q)
+
+def y_to_x(circ, q):
+    circ.adjs(q)
+
+def z_to_x(circ, q):
+    circ.h(q)
+
+def z_to_y(circ, q):
+    circ.h(q)
+    circ.s(q)
 
 def cx(circ, q1, q2):
     circ.mcx([q1], q2)
@@ -30,59 +50,57 @@ def acz(circ, q1, q2):
 def swap(circ, q1, q2):
     circ.swap(q1, q2)
 
-def ccx(circ, q1, q2, q3):
-    circ.mcx([q1, q2], q2)
-
-def ccy(circ, q1, q2, q3):
-    circ.mcy([q1, q2], q3)
-
-def ccz(circ, q1, q2, q3):
-    circ.mcz([q1, q2], q3)
-
-def accx(circ, q1, q2, q3):
-    circ.macx([q1, q2], q3)
-
-def accy(circ, q1, q2, q3):
-    circ.macy([q1, q2], q3)
-
-def accz(circ, q1, q2, q3):
-    circ.macz([q1, q2], q3)
+def ident(circ, q1, q2):
+    pass
 
 # Implementation of random universal circuit
 def bench(sim, depth):
     sim.reset_all()
-    single_bit_gates = sim.h, sim.x, sim.y, sim.z, sim.t, sim.s, sim.adjt, sim.adjs
-    two_bit_gates = swap, cx, cz, cy, acx, acz, acy
-    three_bit_gates = ccx, ccy, ccz, accx, accy, accz
+    single_bit_gates = x_to_y, x_to_z, y_to_z, y_to_x, z_to_x, z_to_y
+    two_bit_gates = ident, swap, cx, cz, cy, acx, acz, acy
+    gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
+    num_qubits = sim.num_qubits()
+    colLen = math.floor(math.sqrt(num_qubits))
+    while ((math.floor(num_qubits / colLen) * colLen) != num_qubits):
+        colLen = colLen - 1
+    rowLen = num_qubits // colLen;
 
     start = time.time()
-
-    num_qubits = sim.num_qubits()
 
     for i in range(depth):
         # Single bit gates
         for j in range(num_qubits):
             gate = random.choice(single_bit_gates)
-            gate(j)
+            gate(sim, j)
+            if random.getrandbits(1) > 0:
+                if random.getrandbits(1) > 0:
+                    sim.t(j)
+                else:
+                    sim.adjt(j)
 
-        # Multi bit gates
-        bit_set = [i for i in range(num_qubits)]
-        while len(bit_set) > 1:
-            b1 = random.choice(bit_set)
-            bit_set.remove(b1)
-            b2 = random.choice(bit_set)
-            bit_set.remove(b2)
-            gate = random.choice(two_bit_gates + three_bit_gates)
-            if len(bit_set) == 0 and (gate in three_bit_gates):
-                gate = random.choice(two_bit_gates)
-            if gate in three_bit_gates:
-                b3 = random.choice(bit_set)
-                bit_set.remove(b3)
-                gate(sim, b1, b2, b3)
-            else:
-                gate(sim, b1, b2)
+        gate = gateSequence[0]
+        gateSequence.pop(0)
+        gateSequence.append(gate)
 
-    qubits = [i for i in range(num_qubits)]
+        for row in range(1, rowLen, 2):
+            for col in range(0, colLen):
+                tempRow = row;
+                tempCol = col;
+
+                tempRow = tempRow + (1 if (gate & 2) else -1)
+                if colLen != 1:
+                    tempCol = tempCol + (1 if (gate & 1) else 0)
+
+                if (tempRow < 0) or (tempCol < 0) or (tempRow >= rowLen) or (tempCol >= colLen):
+                    continue;
+
+                b1 = row * colLen + col;
+                b2 = tempRow * colLen + tempCol;
+
+                # Two bit gates
+                g = random.choice(two_bit_gates)
+                g(sim, b1, b2)
+
     sim.m_all()
 
     return time.time() - start
@@ -104,13 +122,13 @@ def write_csv(writer, data):
     writer.writerow(data)
 
 
-
+# Run with export QRACK_QUNIT_SEPARABILITY_THRESHOLD=0.1464466 for example
 @click.command()
 @click.option('--samples', default=100, help='Number of samples to take for each qubit.')
-@click.option('--qubits', default=28, help='How many qubits you want to test for')
-@click.option('--depth', default=20, help='How large a circuit depth you want to test for')
+@click.option('--qubits', default=36, help='How many qubits you want to test for')
+@click.option('--depth', default=6, help='How large a circuit depth you want to test for')
 @click.option('--out', default='benchmark_data.csv', help='Where to store the CSV output of each test')
-@click.option('--single', default=False, help='Only run the benchmark for a single amount of qubits, and print an analysis')
+@click.option('--single', default=True, help='Only run the benchmark for a single amount of qubits, and print an analysis')
 def benchmark(samples, qubits, depth, out, single):
     if single:
         low = qubits - 1

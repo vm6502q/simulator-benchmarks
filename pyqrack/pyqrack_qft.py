@@ -48,7 +48,7 @@ def write_csv(writer, data):
 
 @click.command()
 @click.option('--samples', default=100, help='Number of samples to take for each qubit.')
-@click.option('--qubits', default=28, help='How many qubits you want to test for')
+@click.option('--qubits', default=30, help='How many qubits you want to test for')
 @click.option('--out', default='benchmark_data.csv', help='Where to store the CSV output of each test')
 @click.option('--single', default=False, help='Only run the benchmark for a single amount of qubits, and print an analysis')
 def benchmark(samples, qubits, out, single):
