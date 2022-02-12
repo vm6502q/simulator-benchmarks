@@ -127,7 +127,7 @@ def bench(sim_backend, num_qubits, depth):
     circ = random_circuit(num_qubits, depth, circ)
     start = time.time()
     circ = transpile(circ, optimization_level=3)
-    job = execute([circ], sim_backend, timeout=600, shots=1)
+    job = execute([circ], sim_backend, timeout=3600, shots=1)
     result = job.result()
     return time.time() - start
 
