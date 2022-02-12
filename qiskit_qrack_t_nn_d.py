@@ -176,10 +176,10 @@ def benchmark(samples, qubits, depth, out, single):
             for i in range(samples):
                 try:
                     t = bench(sim, n+1, d+1)
-                    write_csv(writer, {'name': 'qiskiit_qrack_t_nn_d', 'num_qubits': n+1, 'depth': d+1, 'time': t})
+                    write_csv(writer, {'name': 'qiskit_qrack_t_nn_d', 'num_qubits': n+1, 'depth': d+1, 'time': t})
                 except:
                     del sim
-                    write_csv(writer, {'name': 'qiskiit_qrack_t_nn_d', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
+                    write_csv(writer, {'name': 'qiskit_qrack_t_nn_d', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
                     sim = QasmSimulator(shots=1)
 
 if __name__ == '__main__':
