@@ -9,7 +9,7 @@
 
 #include "qrack/qfactory.hpp"
 
-const int MAX_QUBITS = 28;
+const int MAX_QUBITS = 31;
 const int ITERATIONS = 100;
 const double CLOCK_FACTOR = 1000.0 / CLOCKS_PER_SEC; // Report in ms
 
@@ -60,7 +60,7 @@ void benchmarkLoopVariable(std::function<void(Qrack::QInterfacePtr, int, int)> f
 
     double avgt, stdet;
 
-    for (numBits = 4; numBits <= 28; numBits++) {
+    for (numBits = MAX_QUBITS; numBits <= MAX_QUBITS; numBits++) {
         qftReg = Qrack::CreateQuantumInterface(Qrack::QINTERFACE_OPTIMAL_MULTI, numBits, 0);
         for (depth = minDepth; depth <= maxDepth; depth++) {
             avgt = 0.0;

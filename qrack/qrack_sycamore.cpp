@@ -143,7 +143,7 @@ int main()
                     qReg->ISwap(b1, b2);
                     // "1/6 of CZ" is read to indicate the 6th root.
                     controls[0] = b1;
-                    qReg->ApplyControlledSinglePhase(controls, 1U, b2, ONE_CMPLX, sixthRoot);
+                    qReg->MCPhase(controls, 1U, ONE_CMPLX, sixthRoot, b2);
                     // Note that these gates are both symmetric under exchange of "b1" and "b2".
 
                     // std::cout<<"("<<b1<<", "<<b2<<")"<<std::endl;
