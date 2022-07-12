@@ -26,8 +26,8 @@ sim_backend = StatevectorSimulator(shots=1, method='statevector_gpu')
 def bench(num_qubits):
     circ = QuantumCircuit(num_qubits, num_qubits)
     qft(num_qubits, circ)
-    start = time.time()
     qobj = assemble(circ)
+    start = time.time()
     sv = sim_backend.run(qobj).result().get_statevector()
     return time.time() - start
 

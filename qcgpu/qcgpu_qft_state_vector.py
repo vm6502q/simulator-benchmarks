@@ -11,8 +11,8 @@ import math
 import qcgpu
 
 def bench(num_qubits):
-    start = time.time()
     state = qcgpu.State(num_qubits)
+    start = time.time()
 
     for j in range(num_qubits):
         for k in range(j):

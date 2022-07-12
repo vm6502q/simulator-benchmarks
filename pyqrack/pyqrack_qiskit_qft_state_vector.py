@@ -9,24 +9,25 @@ import math
 
 from pyqrack import QrackSimulator, Pauli
 
-# NOTE - |0> or any permutation basis eigenstate QFT is "trivial" for Qrack, and not a fairly
-#  representative test of general QFT performance, in realistic use cases. Hence, this script
-#  applies a random unitary gate to every qubit in the width before carrying out the QFT.
-#  As a result, every other simulator gets a significant handicap, but a representative one.
+from qiskit import QuantumCircuit
 
-def bench(sim):
-    sim.reset_all()
-    num_qubits = sim.num_qubits()
-    # |0> state QFT is "trivial" for Qrack, so we give it a realistic case instead.
-    # for i in range(num_qubits):
-    #     # Initialize with uniformly random single qubit gates, across full width.
-    #     sim.u(i, random.uniform(0, 2 * math.pi), random.uniform(0, 2 * math.pi), random.uniform(0, 2 * math.pi))
-    qubits = [i for i in range(num_qubits)]
+# Implementation of the Quantum Fourier Transform
+def qft(num_qubits, circ):
+    # Quantum Fourier Transform
+    for j in range(num_qubits):
+        for k in range(j):
+            circ.cp(math.pi/float(2**(j-k)), j, k)
+        circ.h(j)
+
+    return circ
+
+def bench(num_qubits):
+    circ = QuantumCircuit(num_qubits, num_qubits)
+    qft(num_qubits, circ)
+    sim = QrackSimulator(num_qubits)
     start = time.time()
-    sim.qft(qubits)
-    # The output of FFTW is equivalent to state vector.
+    sim.run_qiskit_circuit(experiment=circ, shots=1)
     sv = sim.out_ket()
-
     return time.time() - start
 
 # Reporting
@@ -49,7 +50,7 @@ def write_csv(writer, data):
 
 @click.command()
 @click.option('--samples', default=100, help='Number of samples to take for each qubit.')
-@click.option('--qubits', default=30, help='How many qubits you want to test for')
+@click.option('--qubits', default=28, help='How many qubits you want to test for')
 @click.option('--out', default='benchmark_data.csv', help='Where to store the CSV output of each test')
 @click.option('--single', default=False, help='Only run the benchmark for a single amount of qubits, and print an analysis')
 def benchmark(samples, qubits, out, single):
@@ -63,24 +64,15 @@ def benchmark(samples, qubits, out, single):
     writer = create_csv(out)
 
     for n in range(low, high):
-        sim = QrackSimulator(n + 1)
-
         # Progress counter
         progress = (n - low) / (high - low)
         print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(progress * 50), progress*100), end="", flush=True)
 
         # Run the benchmarks
         for i in range(samples):
-            try:
-                t = bench(sim)
-                write_csv(writer, {'name': 'pyqrack_qft', 'num_qubits': n+1, 'time': t})
-            except:
-                del sim
-                write_csv(writer, {'name': 'pyqrack_qft', 'num_qubits': n+1, 'time': -999})
-                sim = QrackSimulator(n + 1)
-
-        # Call old simulator width destructor BEFORE initializing new width
-        del sim
+            func = random.choice(functions)
+            t = func(n + 1)
+            write_csv(writer, {'name': 'qiskit_qft', 'num_qubits': n+1, 'time': t})
 
 if __name__ == '__main__':
     benchmark()
