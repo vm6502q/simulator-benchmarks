@@ -26,7 +26,7 @@ def bench(sim, num_qubits):
         for j in range(n):
             if m_results[(n - 1) - j]:
                 inv_phase_root_n(sim, ((n - 1) - j) + 2, 0)
-
+        sim.h(0)
         m_results.append(sim.m(0))
         if m_results[-1]:
             sim.x(0)
