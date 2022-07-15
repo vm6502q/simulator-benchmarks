@@ -36,6 +36,7 @@ def bench(num_qubits):
     for _ in range(num_qubits):
         u(state, random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi), 0)
 
+        state.h(0)
         # We use the single control qubit "trick" referenced in Beauregard:
         for j in range(len(m_results)):
             if m_results[j]:

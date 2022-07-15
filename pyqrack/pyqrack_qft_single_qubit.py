@@ -25,6 +25,7 @@ def bench(sim, num_qubits):
         sim.u(0, random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi))
 
         # We use the single control qubit "trick" referenced in Beauregard:
+        sim.h(0)
         for j in range(len(m_results)):
             if m_results[j]:
                 phase_root_n(sim, j + 2, 0)
