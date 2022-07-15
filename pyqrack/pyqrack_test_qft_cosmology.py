@@ -11,8 +11,8 @@ from pyqrack import QrackSimulator, Pauli
 
 # Optimized, based on 'test_qft_cosmology` in the C++ Qrack library benchmark suite.
 
-def inv_phase_root_n(sim, n, q):
-    sim.mtrx([1, 0, 0, -1**(1<<(n - 1))], q)
+def phase_root_n(sim, n, q):
+    sim.mtrx([1, 0, 0, -1**(1.0 / (1<<(n - 1)))], q)
 
 def bench(sim, num_qubits):
     sim.reset_all()
@@ -22,11 +22,11 @@ def bench(sim, num_qubits):
         sim.u(0, random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi))
 
         # We use the single control qubit "trick" referenced in Beauregard:
-        n = len(m_results)
-        for j in range(n):
-            if m_results[(n - 1) - j]:
-                inv_phase_root_n(sim, ((n - 1) - j) + 2, 0)
         sim.h(0)
+        for j in range(len(m_results)):
+            if m_results[j]:
+                phase_root_n(sim, j + 2, 0)
+
         m_results.append(sim.m(0))
         if m_results[-1]:
             sim.x(0)
