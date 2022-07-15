@@ -12,7 +12,7 @@ from pyqrack import QrackSimulator, Pauli
 # Optimized, based on 'test_qft_cosmology` in the C++ Qrack library benchmark suite.
 
 def inv_phase_root_n(sim, n, q):
-    sim.mtrx([1, 0, 0, 1 / (-1**(1.0 / (1<<(n - 1))))], q)
+    sim.mtrx([1, 0, 0, -1**(1<<(n - 1))], q)
 
 def bench(sim, num_qubits):
     sim.reset_all()

@@ -22,7 +22,7 @@ def bench(sim, num_qubits):
     m_results = []
     start = time.time()
     for _ in range(num_qubits):
-        sim.u(0, random.uniform(0, 2 * math.pi), random.uniform(0, 2 * math.pi), random.uniform(0, 2 * math.pi))
+        sim.u(0, random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi))
 
         # We use the single control qubit "trick" referenced in Beauregard:
         for j in range(len(m_results)):
@@ -83,7 +83,7 @@ def benchmark(samples, qubits, out, single):
             except:
                 del sim
                 write_csv(writer, {'name': 'pyqrack_qft', 'num_qubits': n+1, 'time': -999})
-                sim = QrackSimulator(n + 1)
+                sim = QrackSimulator(1)
 
         # Call old simulator width destructor BEFORE initializing new width
         del sim

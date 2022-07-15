@@ -16,7 +16,7 @@ from qiskit.circuit.library.standard_gates.p import PhaseGate
 def qft(num_qubits, circ):
     start = time.time()
     for i in range(num_qubits):
-        circ.u(random.uniform(0, 2 * math.pi), random.uniform(0, 2 * math.pi), random.uniform(0, 2 * math.pi), 0)
+        circ.u(random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi), 0)
 
         # We use the single control qubit "trick" referenced in Beauregard:
         for j in range(i):
