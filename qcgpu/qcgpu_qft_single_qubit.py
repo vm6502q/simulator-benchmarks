@@ -36,13 +36,14 @@ def bench(num_qubits):
     for _ in range(num_qubits):
         u(state, random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi), 0)
 
-        state.h(0)
         # We use the single control qubit "trick" referenced in Beauregard:
-        for j in range(len(m_results)):
+        m_count = len(m_results)
+        for j in range(m_count):
             if m_results[j]:
-                phase_root_n(state, j + 2, 0)
-
+                phase_root_n(state, (m_count - j) + 1, 0)
+        state.h(0)
         m_results.append(state.measure())
+
         if m_results[-1]:
             state.x(0)
 

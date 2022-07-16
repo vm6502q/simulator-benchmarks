@@ -20,11 +20,11 @@ def qft(num_qubits, circ):
         circ.u(random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi), random.uniform(0, 4 * math.pi), 0)
 
         # We use the single control qubit "trick" referenced in Beauregard:
-        circ.h(0)
         for j in range(i):
-            circ.append(PhaseGate(1.0 / (1<<(j + 1))), [0]).c_if(j,1)
-
+            circ.append(PhaseGate(1.0 / (1<<(1 + i - j))), [0]).c_if(j,1)
+        circ.h(0)
         circ.measure(0, i)
+
         circ.reset(0)
 
     return time.time() - start
