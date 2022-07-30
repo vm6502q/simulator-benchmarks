@@ -69,8 +69,6 @@ def random_circuit(num_qubits, depth, circ):
         colLen = colLen - 1
     rowLen = num_qubits // colLen;
 
-    start = time.time()
-
     for i in range(depth):
         # Single bit gates
         for j in range(num_qubits):
