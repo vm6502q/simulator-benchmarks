@@ -62,7 +62,8 @@ def ident(circ, q1, q2):
 # Implementation of random universal circuit
 def random_circuit(num_qubits, depth, circ):
     single_bit_gates = x_to_y, x_to_z, y_to_z, y_to_x, z_to_x, z_to_y
-    two_bit_gates = ident, ident, cx, cz, cy, acx, acz, acy #, swap
+    # two_bit_gates = ident, ident, cx, cz, cy, acx, acz, acy
+    two_bit_gates = swap, ident, cx, cz, cy, acx, acz, acy
     gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
     colLen = math.floor(math.sqrt(num_qubits))
     while ((math.floor(num_qubits / colLen) * colLen) != num_qubits):
@@ -132,9 +133,9 @@ def write_csv(writer, data):
 
 # Run with export QRACK_QUNIT_SEPARABILITY_THRESHOLD=0.1464466 for example
 @click.command()
-@click.option('--samples', default=10, help='Number of samples to take for each qubit.')
-@click.option('--qubits', default=36, help='How many qubits you want to test for')
-@click.option('--depth', default=36, help='How large a circuit depth you want to test for')
+@click.option('--samples', default=100, help='Number of samples to take for each qubit.')
+@click.option('--qubits', default=49, help='How many qubits you want to test for')
+@click.option('--depth', default=49, help='How large a circuit depth you want to test for')
 @click.option('--out', default='benchmark_data.csv', help='Where to store the CSV output of each test')
 @click.option('--single', default=True, help='Only run the benchmark for a single amount of qubits, and print an analysis')
 def benchmark(samples, qubits, depth, out, single):
