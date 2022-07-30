@@ -82,7 +82,7 @@ def random_circuit(num_qubits, depth, circ):
         gateSequence.pop(0)
         gateSequence.append(gate)
 
-        for row in range(1, rowLen, 2):
+        for row in range(0, rowLen, 2):
             for col in range(0, colLen):
                 tempRow = row;
                 tempCol = col;
