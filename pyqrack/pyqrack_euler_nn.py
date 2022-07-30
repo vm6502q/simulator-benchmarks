@@ -12,10 +12,16 @@ from qiskit.compiler.transpiler import transpile
 
 from pyqrack import QrackSimulator
 
+def z_to_x(circ, q):
+    circ.h(q)
+
 def x_to_y(circ, q):
     circ.s(q)
 
-def z_to_x(circ, q):
+def y_to_x(circ, q):
+    circ.sdg(q)
+
+def x_to_z(circ, q):
     circ.h(q)
 
 def cx(circ, q1, q2):
@@ -58,12 +64,17 @@ def random_circuit(num_qubits, depth, circ):
     for i in range(depth):
         # Single bit gates
         for j in range(num_qubits):
-            # Random basis switch
+            # yaw
             circ.rz(random.uniform(0, 2 * math.pi), j)
             z_to_x(circ, j)
+            # pitch
             circ.rz(random.uniform(0, 2 * math.pi), j)
             x_to_y(circ, j)
+            # roll
             circ.rz(random.uniform(0, 2 * math.pi), j)
+            # The gate is already Haar random, but the reset makes more sense for human programming.
+            y_to_x(circ, j)
+            x_to_z(circ, j)
 
         gate = gateSequence[0]
         gateSequence.pop(0)
