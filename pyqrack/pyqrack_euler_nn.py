@@ -15,22 +15,8 @@ from pyqrack import QrackSimulator
 def x_to_y(circ, q):
     circ.s(q)
 
-def x_to_z(circ, q):
-    circ.h(q)
-
-def y_to_z(circ, q):
-    circ.sdg(q)
-    circ.h(q)
-
-def y_to_x(circ, q):
-    circ.sdg(q)
-
 def z_to_x(circ, q):
     circ.h(q)
-
-def z_to_y(circ, q):
-    circ.h(q)
-    circ.s(q)
 
 def cx(circ, q1, q2):
     circ.cx(q1, q2)
@@ -64,7 +50,6 @@ def ident(circ, q1, q2):
 
 # Implementation of random universal circuit
 def random_circuit(num_qubits, depth, circ):
-    single_bit_gates = x_to_y, x_to_z, y_to_z, y_to_x, z_to_x, z_to_y
     # two_bit_gates = ident, ident, cx, cz, cy, acx, acz, acy
     two_bit_gates = swap, ident, cx, cz, cy, acx, acz, acy
     gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
@@ -77,8 +62,10 @@ def random_circuit(num_qubits, depth, circ):
         # Single bit gates
         for j in range(num_qubits):
             # Random basis switch
-            gate = random.choice(single_bit_gates)
-            gate(circ, j)
+            circ.rz(random.uniform(0, 2 * math.pi), j)
+            z_to_x(circ, j)
+            circ.rz(random.uniform(0, 2 * math.pi), j)
+            x_to_y(circ, j)
             circ.rz(random.uniform(0, 2 * math.pi), j)
 
         gate = gateSequence[0]
