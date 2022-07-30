@@ -44,14 +44,17 @@ def cz(circ, q1, q2):
 def acx(circ, q1, q2):
     circ.x(q1)
     circ.cx(q1, q2)
+    circ.x(q1)
 
 def acy(circ, q1, q2):
     circ.x(q1)
     circ.cy(q1, q2)
+    circ.x(q1)
 
 def acz(circ, q1, q2):
     circ.x(q1)
     circ.cz(q1, q2)
+    circ.x(q1)
 
 def swap(circ, q1, q2):
     circ.swap(q1, q2)
@@ -134,8 +137,8 @@ def write_csv(writer, data):
 # Run with export QRACK_QUNIT_SEPARABILITY_THRESHOLD=0.1464466 for example
 @click.command()
 @click.option('--samples', default=100, help='Number of samples to take for each qubit.')
-@click.option('--qubits', default=49, help='How many qubits you want to test for')
-@click.option('--depth', default=49, help='How large a circuit depth you want to test for')
+@click.option('--qubits', default=144, help='How many qubits you want to test for')
+@click.option('--depth', default=144, help='How large a circuit depth you want to test for')
 @click.option('--out', default='benchmark_data.csv', help='Where to store the CSV output of each test')
 @click.option('--single', default=True, help='Only run the benchmark for a single amount of qubits, and print an analysis')
 def benchmark(samples, qubits, depth, out, single):
