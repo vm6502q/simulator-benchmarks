@@ -45,13 +45,10 @@ def acz(circ, q1, q2):
 def swap(circ, q1, q2):
     circ.swap(q1, q2)
 
-def ident(circ, q1, q2):
-    pass
-
 # Implementation of random universal circuit
 def random_circuit(num_qubits, depth, circ):
     # two_bit_gates = ident, ident, cx, cz, cy, acx, acz, acy
-    two_bit_gates = swap, ident, cx, cz, cy, acx, acz, acy
+    two_bit_gates = swap, cx, cz, cy, acx, acz, acy
     gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
     colLen = math.floor(math.sqrt(num_qubits))
     while ((math.floor(num_qubits / colLen) * colLen) != num_qubits):
