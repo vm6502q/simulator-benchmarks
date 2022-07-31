@@ -7,7 +7,9 @@ import csv
 import os.path
 import math
 
-from pyqrack import QrackSimulator, Pauli
+from pyqrack import QrackSimulator
+from qiskit import QuantumCircuit
+from qiskit.compiler.transpiler import transpile
 
 def x_to_y(circ, q):
     circ.s(q)
@@ -16,11 +18,11 @@ def x_to_z(circ, q):
     circ.h(q)
 
 def y_to_z(circ, q):
-    circ.adjs(q)
+    circ.sdg(q)
     circ.h(q)
 
 def y_to_x(circ, q):
-    circ.adjs(q)
+    circ.sdg(q)
 
 def z_to_x(circ, q):
     circ.h(q)
@@ -30,22 +32,28 @@ def z_to_y(circ, q):
     circ.s(q)
 
 def cx(circ, q1, q2):
-    circ.mcx([q1], q2)
+    circ.cx(q1, q2)
 
 def cy(circ, q1, q2):
-    circ.mcy([q1], q2)
+    circ.cy(q1, q2)
 
 def cz(circ, q1, q2):
-    circ.mcz([q1], q2)
+    circ.cz(q1, q2)
 
 def acx(circ, q1, q2):
-    circ.macx([q1], q2)
+    circ.x(q1)
+    circ.cx(q1, q2)
+    circ.x(q1)
 
 def acy(circ, q1, q2):
-    circ.macy([q1], q2)
+    circ.x(q1)
+    circ.cy(q1, q2)
+    circ.x(q1)
 
 def acz(circ, q1, q2):
-    circ.macz([q1], q2)
+    circ.x(q1)
+    circ.cz(q1, q2)
+    circ.x(q1)
 
 def swap(circ, q1, q2):
     circ.swap(q1, q2)
@@ -54,26 +62,23 @@ def ident(circ, q1, q2):
     pass
 
 # Implementation of random universal circuit
-def bench(sim, depth):
-    sim.reset_all()
-    num_qubits = sim.num_qubits()
+def random_circuit(num_qubits, depth, circ):
     single_bit_gates = x_to_y, x_to_z, y_to_z, y_to_x, z_to_x, z_to_y
-    two_bit_gates = swap, cx, cz, cy, acx, acz, acy
+    # two_bit_gates = ident, ident, cx, cz, cy, acx, acz, acy
+    two_bit_gates = swap, ident, cx, cz, cy, acx, acz, acy
     gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
     colLen = math.floor(math.sqrt(num_qubits))
     while ((math.floor(num_qubits / colLen) * colLen) != num_qubits):
         colLen = colLen - 1
     rowLen = num_qubits // colLen;
 
-    start = time.time()
-
     for i in range(depth):
         # Single bit gates
         for j in range(num_qubits):
+            # Random basis switch
             gate = random.choice(single_bit_gates)
             gate(circ, j)
-            circ.r(Pauli.PauliZ, random.uniform(0, 4 * math.pi), j)
-
+            circ.rz(random.uniform(0, 4 * math.pi), j)
 
         gate = gateSequence[0]
         gateSequence.pop(0)
@@ -98,8 +103,17 @@ def bench(sim, depth):
                 g = random.choice(two_bit_gates)
                 g(circ, b1, b2)
 
-    sim.m_all()
+    for j in range(num_qubits):
+        circ.measure(j, j)
 
+    return circ
+
+def bench(num_qubits, depth):
+    circ = QuantumCircuit(num_qubits, num_qubits)
+    circ = random_circuit(num_qubits, depth, circ)
+    start = time.time()
+    circ = transpile(circ, optimization_level=3)
+    sim = QrackSimulator(qiskitCircuit=circ)
     return time.time() - start
 
 # Reporting
@@ -136,8 +150,6 @@ def benchmark(samples, qubits, depth, out, single):
     writer = create_csv(out)
 
     for n in range(low, high):
-        sim = QrackSimulator(n + 1)
-
         for d in [depth - 1]:
             # Progress counter
             progress = (((n - low) * depth) + d) / ((high - low) * depth)
@@ -145,15 +157,11 @@ def benchmark(samples, qubits, depth, out, single):
 
             # Run the benchmarks
             for i in range(samples):
-                try:
-                    t = bench(sim, d + 1)
+                #try:
+                    t = bench(n, d + 1)
                     write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': t})
-                except:
-                    del sim
-                    write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
-                    sim = QrackSimulator(n + 1)
-
-        del sim
+                #except:
+                #    write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
 
 if __name__ == '__main__':
     benchmark()
