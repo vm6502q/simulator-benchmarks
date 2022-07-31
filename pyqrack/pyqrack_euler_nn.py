@@ -137,12 +137,12 @@ def benchmark(samples, qubits, depth, out, single):
 
             # Run the benchmarks
             for i in range(samples):
-                #try:
+                try:
                     t = bench(sim, d + 1)
                     write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': t})
-                #except:
-                #    del sim
-                #    write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
+                except:
+                    del sim
+                    write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
                     sim = QrackSimulator(n + 1)
 
         del sim
