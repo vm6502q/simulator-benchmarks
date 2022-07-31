@@ -79,7 +79,7 @@ def random_circuit(num_qubits, depth, circ):
             # Random basis switch
             gate = random.choice(single_bit_gates)
             gate(circ, j)
-            circ.rz(random.uniform(0, 2 * math.pi), j)
+            circ.rz(random.uniform(0, 4 * math.pi), j)
 
         gate = gateSequence[0]
         gateSequence.pop(0)
@@ -161,9 +161,9 @@ def benchmark(samples, qubits, depth, out, single):
             for i in range(samples):
                 try:
                     t = bench(n, d + 1)
-                    write_csv(writer, {'name': 'pyqrack_t_nn_d_no_y', 'num_qubits': n+1, 'depth': d+1, 'time': t})
+                    write_csv(writer, {'name': 'pyqrack_t_nn', 'num_qubits': n+1, 'depth': d+1, 'time': t})
                 except:
-                    write_csv(writer, {'name': 'pyqrack_t_nn_d_no_y', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
+                    write_csv(writer, {'name': 'pyqrack_t_nn', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
 
 if __name__ == '__main__':
     benchmark()

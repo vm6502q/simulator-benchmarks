@@ -65,13 +65,13 @@ def random_circuit(num_qubits, depth, circ):
         # Single bit gates
         for j in range(num_qubits):
             # yaw
-            circ.rz(random.uniform(0, 2 * math.pi), j)
+            circ.rz(random.uniform(0, 4 * math.pi), j)
             z_to_x(circ, j)
             # pitch
-            circ.rz(random.uniform(0, 2 * math.pi), j)
+            circ.rz(random.uniform(0, 4 * math.pi), j)
             x_to_y(circ, j)
             # roll
-            circ.rz(random.uniform(0, 2 * math.pi), j)
+            circ.rz(random.uniform(0, 4 * math.pi), j)
             # The gate is already Haar random, but the reset makes more sense for human programming.
             y_to_x(circ, j)
             x_to_z(circ, j)
@@ -156,9 +156,9 @@ def benchmark(samples, qubits, depth, out, single):
             for i in range(samples):
                 try:
                     t = bench(n, d + 1)
-                    write_csv(writer, {'name': 'pyqrack_t_nn_d_no_y', 'num_qubits': n+1, 'depth': d+1, 'time': t})
+                    write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': t})
                 except:
-                    write_csv(writer, {'name': 'pyqrack_t_nn_d_no_y', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
+                    write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
 
 if __name__ == '__main__':
     benchmark()
