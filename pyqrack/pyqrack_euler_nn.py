@@ -149,11 +149,11 @@ def benchmark(samples, qubits, depth, out, single):
 
             # Run the benchmarks
             for i in range(samples):
-                #try:
+                try:
                     t = bench(n, d + 1)
                     write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': t})
-                #except:
-                #    write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
+                except:
+                    write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
 
 if __name__ == '__main__':
     benchmark()
