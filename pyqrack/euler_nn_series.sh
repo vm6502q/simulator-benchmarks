@@ -5,15 +5,3 @@ python3 pyqrack_euler_nn.py --qubits=25 --depth=25
 python3 pyqrack_euler_nn.py --qubits=36 --depth=36
 python3 pyqrack_euler_nn.py --qubits=49 --depth=49
 python3 pyqrack_euler_nn.py --qubits=64 --depth=64
-python3 pyqrack_euler_nn.py --qubits=81 --depth=81
-python3 pyqrack_euler_nn.py --qubits=100 --depth=100
-python3 pyqrack_euler_nn.py --qubits=121 --depth=121
-python3 pyqrack_euler_nn.py --qubits=144 --depth=144
-python3 pyqrack_euler_nn.py --qubits=169 --depth=169
-python3 pyqrack_euler_nn.py --qubits=196 --depth=196
-python3 pyqrack_euler_nn.py --qubits=225 --depth=225
-python3 pyqrack_euler_nn.py --qubits=256 --depth=256
-python3 pyqrack_euler_nn.py --qubits=512 --depth=512
-python3 pyqrack_euler_nn.py --qubits=1024 --depth=1024
-python3 pyqrack_euler_nn.py --qubits=2048 --depth=2048
-python3 pyqrack_euler_nn.py --qubits=4096 --depth=4096
