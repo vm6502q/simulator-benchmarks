@@ -10,6 +10,7 @@ import math
 from pyqrack import QrackSimulator
 from qiskit import QuantumCircuit
 from qiskit.compiler.transpiler import transpile
+from qiskit.providers.qrack import QasmSimulator
 
 def z_to_x(circ, q):
     circ.h(q)
@@ -104,9 +105,9 @@ def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)
     circ = random_circuit(num_qubits, depth, circ)
     start = time.time()
-    circ = transpile(circ, optimization_level=3)
-    sim = QrackSimulator(qiskitCircuit=circ)
-    return time.time() - start
+    circ = transpile(circ, optimization_level=3, backend=QasmSimulator())
+    sim = QrackSimulator(num_qubits, qiskitCircuit=circ)
+    return sim.m_all()
 
 # Reporting
 def create_csv(filename):

@@ -10,6 +10,7 @@ import math
 from pyqrack import QrackSimulator
 from qiskit import QuantumCircuit
 from qiskit.compiler.transpiler import transpile
+from qiskit.providers.qrack import QasmSimulator
 
 def x_to_y(circ, q):
     circ.s(q)
@@ -112,7 +113,7 @@ def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)
     circ = random_circuit(num_qubits, depth, circ)
     start = time.time()
-    circ = transpile(circ, optimization_level=3)
+    circ = transpile(circ, optimization_level=3, backend=QasmSimulator())
     sim = QrackSimulator(qiskitCircuit=circ)
     return time.time() - start
 
