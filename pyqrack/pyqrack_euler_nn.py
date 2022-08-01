@@ -107,7 +107,7 @@ def bench(num_qubits, depth):
     start = time.time()
     circ = transpile(circ, optimization_level=3, backend=QasmSimulator())
     sim = QrackSimulator(num_qubits, qiskitCircuit=circ)
-    return sim.m_all()
+    return time.time() - start
 
 # Reporting
 def create_csv(filename):
