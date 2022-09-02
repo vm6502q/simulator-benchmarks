@@ -16,7 +16,7 @@ def sqrty(circ, t):
     circ.u(t, -3 * math.pi / 2, 0, 0)
 
 def sqrtw(circ, t):
-    circ.mtrx([math.sqrt(1 / 2), -((1j / 2) ** (1 / 2)), math.sqrt(1 / 2), (-1j / 2) ** (1 / 2)], t)
+    circ.mtrx([math.sqrt(1 / 2), -((1j / 2) ** (1 / 2)), (-1j / 2) ** (1 / 2), math.sqrt(1 / 2)], t)
 
 def bench(sim, depth):
     sim.reset_all()
