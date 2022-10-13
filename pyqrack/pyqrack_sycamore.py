@@ -67,8 +67,8 @@ def bench(sim, depth):
                 b2 = tempRow * colLen + tempCol;
 
                 # Two bit gates
-                sim.mcmtrx([b1], [1, 0, 0, pow(-1, math.pi / 6)], b2)
                 sim.iswap(b1, b2)
+                sim.mcmtrx([b1], [1, 0, 0, pow(-1, math.pi / 6)], b2)
 
     qubits = [i for i in range(num_qubits)]
     sim.m_all()
@@ -98,7 +98,7 @@ def write_csv(writer, data):
 @click.option('--qubits', default=28, help='How many qubits you want to test for')
 @click.option('--depth', default=20, help='How large a circuit depth you want to test for')
 @click.option('--out', default='benchmark_data.csv', help='Where to store the CSV output of each test')
-@click.option('--single', default=False, help='Only run the benchmark for a single amount of qubits, and print an analysis')
+@click.option('--single', default=True, help='Only run the benchmark for a single amount of qubits, and print an analysis')
 def benchmark(samples, qubits, depth, out, single):
     if single:
         low = qubits - 1
@@ -111,7 +111,7 @@ def benchmark(samples, qubits, depth, out, single):
     for n in range(low, high):
         sim = QrackSimulator(n + 1)
 
-        for d in range(depth):
+        for d in [depth - 1]:
             # Progress counter
             progress = (((n - low) * depth) + d) / ((high - low) * depth)
             print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(progress * 50), progress*100), end="", flush=True)

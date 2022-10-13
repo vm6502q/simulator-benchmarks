@@ -78,7 +78,7 @@ def sycamore_circuit(num_qubits, depth, circ):
 
     return circ
 
-sim_backend = QasmSimulator(shots=1, is_schmidt_decompose=False, is_stabilizer_hybrid=False, is_1qb_fusion=False)
+sim_backend = QasmSimulator(shots=1)
 
 def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)
