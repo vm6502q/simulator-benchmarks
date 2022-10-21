@@ -7,20 +7,28 @@ import csv
 import os.path
 import math
 
-from pyqrack import QrackSimulator
 from qiskit import QuantumCircuit
-from qiskit.compiler.transpiler import transpile
-from qiskit.providers.qrack import QasmSimulator
-
-def z_to_x(circ, q):
-    circ.h(q)
+from qiskit import execute, Aer
 
 def x_to_y(circ, q):
     circ.s(q)
 
+def x_to_z(circ, q):
+    circ.h(q)
+
 def y_to_z(circ, q):
     circ.sdg(q)
     circ.h(q)
+
+def y_to_x(circ, q):
+    circ.sdg(q)
+
+def z_to_x(circ, q):
+    circ.h(q)
+
+def z_to_y(circ, q):
+    circ.h(q)
+    circ.s(q)
 
 def cx(circ, q1, q2):
     circ.cx(q1, q2)
@@ -49,10 +57,14 @@ def acz(circ, q1, q2):
 def swap(circ, q1, q2):
     circ.swap(q1, q2)
 
+def ident(circ, q1, q2):
+    pass
+
 # Implementation of random universal circuit
 def random_circuit(num_qubits, depth, circ):
+    single_bit_gates = x_to_y, x_to_z, y_to_z, y_to_x, z_to_x, z_to_y
     # two_bit_gates = ident, ident, cx, cz, cy, acx, acz, acy
-    two_bit_gates = swap, cx, cz, cy, acx, acz, acy
+    two_bit_gates = swap, ident, cx, cz, cy, acx, acz, acy
     gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
     colLen = math.floor(math.sqrt(num_qubits))
     while ((math.floor(num_qubits / colLen) * colLen) != num_qubits):
@@ -62,16 +74,10 @@ def random_circuit(num_qubits, depth, circ):
     for i in range(depth):
         # Single bit gates
         for j in range(num_qubits):
-            # yaw
-            circ.rz(random.uniform(0, 4 * math.pi), j)
-            z_to_x(circ, j)
-            # pitch
-            circ.rz(random.uniform(0, 4 * math.pi), j)
-            x_to_y(circ, j)
-            # roll
-            circ.rz(random.uniform(0, 4 * math.pi), j)
-            # The gate is already Haar random, but the reset makes more sense for human programming.
-            y_to_z(circ, j)
+            # Random basis switch
+            gate = random.choice(single_bit_gates)
+            gate(circ, j)
+            circ.p(random.uniform(0, 4 * math.pi), j)
 
         gate = gateSequence[0]
         gateSequence.pop(0)
@@ -101,12 +107,14 @@ def random_circuit(num_qubits, depth, circ):
 
     return circ
 
+sim_backend = Aer.get_backend('qasm_simulator')
+
 def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)
-    circ = random_circuit(num_qubits, depth, circ)
+    random_circuit(num_qubits, depth, circ)
     start = time.time()
-    circ = transpile(circ, optimization_level=3, backend=QasmSimulator())
-    sim = QrackSimulator(num_qubits, qiskitCircuit=circ)
+    job = execute([circ], sim_backend, timeout=600, shots=1)
+    result = job.result()
     return time.time() - start
 
 # Reporting
@@ -129,10 +137,10 @@ def write_csv(writer, data):
 # Run with export QRACK_QUNIT_SEPARABILITY_THRESHOLD=0.1464466 for example
 @click.command()
 @click.option('--samples', default=100, help='Number of samples to take for each qubit.')
-@click.option('--qubits', default=49, help='How many qubits you want to test for')
-@click.option('--depth', default=49, help='How large a circuit depth you want to test for')
+@click.option('--qubits', default=28, help='How many qubits you want to test for')
+@click.option('--depth', default=20, help='How large a circuit depth you want to test for')
 @click.option('--out', default='benchmark_data.csv', help='Where to store the CSV output of each test')
-@click.option('--single', default=True, help='Only run the benchmark for a single amount of qubits, and print an analysis')
+@click.option('--single', default=False, help='Only run the benchmark for a single amount of qubits, and print an analysis')
 def benchmark(samples, qubits, depth, out, single):
     if single:
         low = qubits - 1
@@ -141,20 +149,17 @@ def benchmark(samples, qubits, depth, out, single):
     high = qubits
 
     writer = create_csv(out)
-
+    
     for n in range(low, high):
-        for d in [depth - 1]:
+        for d in range(depth):
             # Progress counter
             progress = (((n - low) * depth) + d) / ((high - low) * depth)
             print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(progress * 50), progress*100), end="", flush=True)
 
             # Run the benchmarks
             for i in range(samples):
-                try:
-                    t = bench(n, d + 1)
-                    write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': t})
-                except:
-                    write_csv(writer, {'name': 'pyqrack_euler_nn', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
+                t = bench(n + 1, d + 1)
+                write_csv(writer, {'name': 'qiskit_t_nn', 'num_qubits': n+1, 'depth': d+1, 'time': t})
 
 if __name__ == '__main__':
     benchmark()

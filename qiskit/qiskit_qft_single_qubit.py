@@ -35,7 +35,7 @@ def bench(num_qubits):
     circ = QuantumCircuit(1, num_qubits)
     qft(num_qubits, circ)
     start = time.time()
-    job = execute([circ], sim_backend, timeout=600)
+    job = execute([circ], sim_backend, timeout=600, shots=1)
     result = job.result()
     return time.time() - start
 

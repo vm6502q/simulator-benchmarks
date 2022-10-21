@@ -98,7 +98,7 @@ def write_csv(writer, data):
 @click.option('--qubits', default=28, help='How many qubits you want to test for')
 @click.option('--depth', default=20, help='How large a circuit depth you want to test for')
 @click.option('--out', default='benchmark_data.csv', help='Where to store the CSV output of each test')
-@click.option('--single', default=True, help='Only run the benchmark for a single amount of qubits, and print an analysis')
+@click.option('--single', default=False, help='Only run the benchmark for a single amount of qubits, and print an analysis')
 def benchmark(samples, qubits, depth, out, single):
     if single:
         low = qubits - 1

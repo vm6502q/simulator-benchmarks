@@ -7,7 +7,7 @@ import csv
 import os.path
 import math
 
-from pyqrack import QrackSimulator
+import qcgpu
 
 def x_to_y(circ, q):
     circ.s(q)
@@ -16,11 +16,11 @@ def x_to_z(circ, q):
     circ.h(q)
 
 def y_to_z(circ, q):
-    circ.adjs(q)
+    circ.u1(q, 3 * math.pi / 2)
     circ.h(q)
 
 def y_to_x(circ, q):
-    circ.adjs(q)
+    circ.u1(q, 3 * math.pi / 2)
 
 def z_to_x(circ, q):
     circ.h(q)
@@ -30,53 +30,56 @@ def z_to_y(circ, q):
     circ.s(q)
 
 def cx(circ, q1, q2):
-    circ.mcx([q1], q2)
+    circ.cx(q1, q2)
 
 def cy(circ, q1, q2):
-    circ.mcy([q1], q2)
+    circ.cu3(q1, q2, math.pi / 2, math.pi / 2, math.pi / 2)
 
 def cz(circ, q1, q2):
-    circ.mcz([q1], q2)
+    circ.cz(q1, q2)
 
 def acx(circ, q1, q2):
-    circ.macx([q1], q2)
+    circ.x(q1)
+    circ.cx(q1, q2)
+    circ.x(q1)
 
 def acy(circ, q1, q2):
-    circ.macy([q1], q2)
+    circ.x(q1)
+    circ.cu3(q1, q2, math.pi / 2, math.pi / 2, math.pi / 2)
+    circ.x(q1)
 
 def acz(circ, q1, q2):
-    circ.macz([q1], q2)
+    circ.x(q1)
+    circ.cz(q1, q2)
+    circ.x(q1)
 
 def swap(circ, q1, q2):
-    circ.swap(q1, q2)
+    circ.cx(q1, q2)
+    circ.cx(q2, q1)
+    circ.cx(q1, q2)
 
 def ident(circ, q1, q2):
     pass
 
 # Implementation of random universal circuit
-def bench(sim, depth):
-    sim.reset_all()
+def random_circuit(num_qubits, depth):
+    circ = qcgpu.State(num_qubits)
     single_bit_gates = x_to_y, x_to_z, y_to_z, y_to_x, z_to_x, z_to_y
-    two_bit_gates = ident, swap, cx, cz, cy, acx, acz, acy
+    # two_bit_gates = ident, ident, cx, cz, cy, acx, acz, acy
+    two_bit_gates = swap, ident, cx, cz, cy, acx, acz, acy
     gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
-    num_qubits = sim.num_qubits()
     colLen = math.floor(math.sqrt(num_qubits))
     while ((math.floor(num_qubits / colLen) * colLen) != num_qubits):
         colLen = colLen - 1
     rowLen = num_qubits // colLen;
 
-    start = time.time()
-
     for i in range(depth):
         # Single bit gates
         for j in range(num_qubits):
+            # Random basis switch
             gate = random.choice(single_bit_gates)
-            gate(sim, j)
-            if random.getrandbits(1) > 0:
-                if random.getrandbits(1) > 0:
-                    sim.t(j)
-                else:
-                    sim.adjt(j)
+            gate(circ, j)
+            circ.u1(j, random.uniform(0, 4 * math.pi))
 
         gate = gateSequence[0]
         gateSequence.pop(0)
@@ -99,10 +102,15 @@ def bench(sim, depth):
 
                 # Two bit gates
                 g = random.choice(two_bit_gates)
-                g(sim, b1, b2)
+                g(circ, b1, b2)
 
-    sim.m_all()
+    circ.measure()
 
+    return circ
+
+def bench(num_qubits, depth):
+    start = time.time()
+    circ = random_circuit(num_qubits, depth)
     return time.time() - start
 
 # Reporting
@@ -125,10 +133,10 @@ def write_csv(writer, data):
 # Run with export QRACK_QUNIT_SEPARABILITY_THRESHOLD=0.1464466 for example
 @click.command()
 @click.option('--samples', default=100, help='Number of samples to take for each qubit.')
-@click.option('--qubits', default=36, help='How many qubits you want to test for')
-@click.option('--depth', default=36, help='How large a circuit depth you want to test for')
+@click.option('--qubits', default=28, help='How many qubits you want to test for')
+@click.option('--depth', default=20, help='How large a circuit depth you want to test for')
 @click.option('--out', default='benchmark_data.csv', help='Where to store the CSV output of each test')
-@click.option('--single', default=True, help='Only run the benchmark for a single amount of qubits, and print an analysis')
+@click.option('--single', default=False, help='Only run the benchmark for a single amount of qubits, and print an analysis')
 def benchmark(samples, qubits, depth, out, single):
     if single:
         low = qubits - 1
@@ -137,10 +145,8 @@ def benchmark(samples, qubits, depth, out, single):
     high = qubits
 
     writer = create_csv(out)
-
+    
     for n in range(low, high):
-        sim = QrackSimulator(n + 1)
-
         for d in range(depth):
             # Progress counter
             progress = (((n - low) * depth) + d) / ((high - low) * depth)
@@ -148,16 +154,8 @@ def benchmark(samples, qubits, depth, out, single):
 
             # Run the benchmarks
             for i in range(samples):
-                try:
-                    t = bench(sim, d + 1)
-                    write_csv(writer, {'name': 'pyqrack_random_extended', 'num_qubits': n+1, 'depth': d+1, 'time': t})
-                except:
-                    del sim
-                    write_csv(writer, {'name': 'pyqrack_random_extended', 'num_qubits': n+1, 'depth': d+1, 'time': -999})
-                    sim = QrackSimulator(n + 1)
-
-        # Call old simulator width destructor BEFORE initializing new width
-        del sim
+                t = bench(n + 1, d + 1)
+                write_csv(writer, {'name': 'qcgpu_t_nn', 'num_qubits': n+1, 'depth': d+1, 'time': t})
 
 if __name__ == '__main__':
     benchmark()

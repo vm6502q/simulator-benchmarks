@@ -11,33 +11,97 @@ from qiskit import QuantumCircuit
 from qiskit import execute, Aer
 from qiskit.providers.aer import QasmSimulator
 
+def x_to_y(circ, q):
+    circ.s(q)
+
+def x_to_z(circ, q):
+    circ.h(q)
+
+def y_to_z(circ, q):
+    circ.sdg(q)
+    circ.h(q)
+
+def y_to_x(circ, q):
+    circ.sdg(q)
+
+def z_to_x(circ, q):
+    circ.h(q)
+
+def z_to_y(circ, q):
+    circ.h(q)
+    circ.s(q)
+
+def cx(circ, q1, q2):
+    circ.cx(q1, q2)
+
+def cy(circ, q1, q2):
+    circ.cy(q1, q2)
+
+def cz(circ, q1, q2):
+    circ.cz(q1, q2)
+
+def acx(circ, q1, q2):
+    circ.x(q1)
+    circ.cx(q1, q2)
+    circ.x(q1)
+
+def acy(circ, q1, q2):
+    circ.x(q1)
+    circ.cy(q1, q2)
+    circ.x(q1)
+
+def acz(circ, q1, q2):
+    circ.x(q1)
+    circ.cz(q1, q2)
+    circ.x(q1)
+
+def swap(circ, q1, q2):
+    circ.swap(q1, q2)
+
+def ident(circ, q1, q2):
+    pass
+
 # Implementation of random universal circuit
-def rand_circuit(num_qubits, depth, circ):
-    single_bit_gates = circ.h, circ.x, circ.y, circ.z, circ.t
-    multi_bit_gates = circ.swap, circ.cx, circ.cz, circ.ccx
+def random_circuit(num_qubits, depth, circ):
+    single_bit_gates = x_to_y, x_to_z, y_to_z, y_to_x, z_to_x, z_to_y
+    # two_bit_gates = ident, ident, cx, cz, cy, acx, acz, acy
+    two_bit_gates = swap, ident, cx, cz, cy, acx, acz, acy
+    gateSequence = [ 0, 3, 2, 1, 2, 1, 0, 3 ]
+    colLen = math.floor(math.sqrt(num_qubits))
+    while ((math.floor(num_qubits / colLen) * colLen) != num_qubits):
+        colLen = colLen - 1
+    rowLen = num_qubits // colLen;
 
     for i in range(depth):
         # Single bit gates
         for j in range(num_qubits):
+            # Random basis switch
             gate = random.choice(single_bit_gates)
-            gate(j)
+            gate(circ, j)
+            circ.p(random.uniform(0, 4 * math.pi), j)
 
-        # Multi bit gates
-        bit_set = [i for i in range(num_qubits)]
-        while len(bit_set) > 1:
-            b1 = random.choice(bit_set)
-            bit_set.remove(b1)
-            b2 = random.choice(bit_set)
-            bit_set.remove(b2)
-            gate = random.choice(multi_bit_gates)
-            while len(bit_set) == 0 and gate == circ.ccx:
-                gate = random.choice(multi_bit_gates)
-            if gate == circ.ccx:
-                b3 = random.choice(bit_set)
-                bit_set.remove(b3)
-                gate(b1, b2, b3)
-            else:
-                gate(b1, b2)
+        gate = gateSequence[0]
+        gateSequence.pop(0)
+        gateSequence.append(gate)
+
+        for row in range(1, rowLen, 2):
+            for col in range(0, colLen):
+                tempRow = row;
+                tempCol = col;
+
+                tempRow = tempRow + (1 if (gate & 2) else -1)
+                if colLen != 1:
+                    tempCol = tempCol + (1 if (gate & 1) else 0)
+
+                if (tempRow < 0) or (tempCol < 0) or (tempRow >= rowLen) or (tempCol >= colLen):
+                    continue;
+
+                b1 = row * colLen + col;
+                b2 = tempRow * colLen + tempCol;
+
+                # Two bit gates
+                g = random.choice(two_bit_gates)
+                g(circ, b1, b2)
 
     for j in range(num_qubits):
         circ.measure(j, j)
@@ -48,7 +112,7 @@ sim_backend = QasmSimulator(shots=1, method='statevector_gpu')
 
 def bench(num_qubits, depth):
     circ = QuantumCircuit(num_qubits, num_qubits)
-    rand_circuit(num_qubits, depth, circ)
+    random_circuit(num_qubits, depth, circ)
     start = time.time()
     job = execute([circ], sim_backend, timeout=600)
     result = job.result()
@@ -58,7 +122,7 @@ def bench(num_qubits, depth):
 def create_csv(filename):
     file_exists = os.path.isfile(filename)
     csvfile = open(filename, 'a')
-   
+
     headers = ['name', 'num_qubits', 'depth', 'time']
     writer = csv.DictWriter(csvfile, delimiter=',', lineterminator='\n',fieldnames=headers)
 
@@ -71,7 +135,7 @@ def write_csv(writer, data):
     writer.writerow(data)
 
 
-
+# Run with export QRACK_QUNIT_SEPARABILITY_THRESHOLD=0.1464466 for example
 @click.command()
 @click.option('--samples', default=100, help='Number of samples to take for each qubit.')
 @click.option('--qubits', default=28, help='How many qubits you want to test for')
@@ -85,9 +149,8 @@ def benchmark(samples, qubits, depth, out, single):
         low = 3
     high = qubits
 
-    functions = bench,
     writer = create_csv(out)
-
+    
     for n in range(low, high):
         for d in range(depth):
             # Progress counter
@@ -96,9 +159,8 @@ def benchmark(samples, qubits, depth, out, single):
 
             # Run the benchmarks
             for i in range(samples):
-                func = random.choice(functions)
-                t = func(n+1, d+1)
-                write_csv(writer, {'name': 'qiskit_random', 'num_qubits': n+1, 'depth': d+1, 'time': t})
+                t = bench(n + 1, d + 1)
+                write_csv(writer, {'name': 'qiskit_t_nn', 'num_qubits': n+1, 'depth': d+1, 'time': t})
 
 if __name__ == '__main__':
     benchmark()
