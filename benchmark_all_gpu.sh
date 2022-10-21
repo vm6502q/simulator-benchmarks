@@ -1,8 +1,8 @@
-export PYOPENCL_CTX='1'
+export PYOPENCL_CTX='0'
 
-# python3 pyqrack/pyqrack_qft.py --out=pyqrack_qft.csv;
-# python3 pyqrack/pyqrack_t_nn.py --out=pyqrack_t_nn.csv;
-# python3 pyqrack/pyqrack_sycamore.py --out=pyqrack_sycamore.csv;
+python3 pyqrack/pyqrack_qft.py --out=pyqrack_qft.csv;
+python3 pyqrack/pyqrack_t_nn.py --out=pyqrack_t_nn.csv;
+python3 pyqrack/pyqrack_sycamore.py --out=pyqrack_sycamore.csv;
 
 python3 qiskit_gpu/qiskit_gpu_qft.py --out=qiskit_gpu_qft.csv;
 python3 qiskit_gpu/qiskit_gpu_t_nn.py --out=qiskit_gpu_t_nn.csv;
